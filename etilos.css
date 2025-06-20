@@ -1,0 +1,917 @@
+
+        /* style.css */
+
+        /* Import fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap'); /* For hero */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap'); /* For section titles */
+        @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap'); /* For destinations */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap'); /* For testimonials */
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap'); /* For chatbot */
+
+        /* Base Styles */
+        *{
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+    width: 100%;
+    height: 100%;
+    background: #16384c00; /* Fully transparent background */
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* --- AÑADE ESTA LÍNEA --- */
+    padding-top: 150px; /* Ajusta este valor. Empieza con 150px y ve subiendo/bajando. */
+    /* --- FIN DE LA LÍNEA A AÑADIR --- */
+}
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: transparent; /* Fully transparent header */
+            padding: 3rem 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        /* Logo Styling */
+        .logo-corner-link {
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+            z-index: 1001;
+            display: block;
+        }
+
+        .logo-corner-img {
+            height: 150px;
+            width: auto;
+            display: block;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80%;
+            margin: -3.5rem auto; /* Centrado horizontal y separación desde el top */
+            padding: 1rem 2rem;
+            background: linear-gradient(90deg,#fa7e01, #fffb00 );
+            border-radius: 50px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-links a {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: rgb(0, 0, 0); /* Color of the text inside the "border" */
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+            background: rgb(254, 128, 10);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(44, 62, 80, 0.95);
+            list-style: none;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 0.5rem 0;
+            backdrop-filter: blur(5px);
+        }
+
+        .dropdown-menu li a {
+            color: white;
+            font-size: 1.0rem;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            white-space: nowrap;
+            border-radius: 0;
+            text-shadow: none;
+        }
+
+        .dropdown-menu li a:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        /* Hero Section Styles */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh; /* Full viewport height */
+            display: flex;
+            justify-content: center; /* Center content horizontally */
+            align-items: center;   /* Center content vertically */
+            text-align: center;
+            color: white;
+            overflow: hidden; /* Hide anything outside the hero bounds */
+            padding-top: 60px; /* Adjust for fixed header height */
+            flex-direction: column; /* Stack content vertically initially, then use flex for inner elements */
+        }
+
+        .video-container {
+            position: absolute; /* Changed from flex */
+            top: 0; /* Changed from 6.0rem to 0 to cover full hero */
+            left: 0;
+
+            width: 100%;
+            height: 100%; /* Changed from 50% to 100% to cover full hero */
+            overflow: hidden;
+            z-index: -2; /* Place behind other content */
+        }
+
+        .video-responsive-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            padding-top: 56.25%; /* Proporción 16:9 (9 / 16 = 0.5625) */
+            border-radius: 12px; /* Bordes redondeados para un look moderno */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Sombra suave */
+        }
+
+        .video-responsive-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            border: none; /* Quitamos el borde del iframe */
+        }
+
+        .background-video {
+            width: 100%;
+            height: 72.5%;
+            position: relative;
+            top: -6.9rem;
+            object-fit: cover; /* Cover the entire container */
+            filter: brightness(0.7); /* Darken the video for text readability */
+        }
+
+        .hero-overlay {
+            position: absolute; /* Changed from flex */
+            top: 0;
+            left: 0;
+            width: 100%; /* Changed from 50% to cover full hero */
+            height: 100%; /* Changed from 50% to cover full hero */
+            z-index: -1; /* Place between video and content */
+        }
+
+        /* New container for the main text and price box */
+        .hero-main-content {
+            position: relative; /* Allows positioning of children relative to this container */
+            z-index: 1; /* Ensure it's above the overlay */
+            display: flex; /* Use flexbox to arrange text and price side-by-side */
+            align-items: center; /* Vertically align items in the center */
+            justify-content: center; /* Horizontally center the group */
+            gap: 20px; /* Space between the text box and the price box */
+            max-width: 90%; /* Limit width to prevent content from touching edges */
+            padding: 20px;
+        }
+
+        .hero-text-box {
+    position: relative; /* ¡IMPORTANTE! Asegúrate de que este elemento esté posicionado */
+    top: 80%; /* Ejemplo: Centra verticalmente */
+    left: 0%; /* Ejemplo: Centra horizontalmente */
+    transform: translate(-50%, -50%); /* Para centrarlo perfectamente si usas top/left 50% */
+    color: #fdfdfd;
+    padding: 30px 0px;
+    border-radius: 8px;
+    text-align: left; /* Align text to the left within its box */
+    max-width: 790px; /* Adjust max width as needed */
+    font-size: 2.5rem; /* Ajustado a un tamaño de fuente más razonable. 221.5rem es extremadamente grande. */
+}
+
+        .hero-text-box h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem; /* Increased size for prominence */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-text-box p {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+       .price-box {
+    background-color: rgba(35, 233, 13, 0.5); /* Greenish transparent background */
+    padding: 15px 25px;
+    position: absolute; /* ¡IMPORTANTE! Cambiado de 'relative' a 'absolute' */
+    top: 20px; /* Ejemplo: 20px desde la parte superior de su contenedor padre posicionado */
+    bottom: auto; /* Puedes ajustar esto según necesites */
+    left: 10px; /* Ejemplo: 10px desde la izquierda de su contenedor padre posicionado */
+    right: -55%; /* Puedes ajustar esto según necesites */
+    border-radius: 0px; /* Changed to 0px as requested */
+    text-align: center;
+    display: flex; /* Corregido: 'display: 10.0rem;' no es válido. Cambiado a 'flex' */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px; /* Updated to 140px as requested */
+    box-shadow: 0 4px 10px rgb(255, 255, 255); /* Updated box-shadow as requested */
+}
+
+        .price-box p {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+        }
+
+        .price-box span {
+            font-size: 2.5rem; /* Larger font size for the price */
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Removing or adjusting old .precio and .hero-content styles */
+        .precio {
+            display: none; /* Hide old price div */
+        }
+        .hero-content {
+            display: none; /* Hide old hero-content div */
+        }
+        .hero h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .hero p {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.0rem;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(90deg, #ff8c42, #ff6b6b);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-button:hover {
+            background: linear-gradient(90deg, #ff6b6b, #ff8c42);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.8rem;
+            }
+
+            /* Adjusted for new hero-text-box h1/p */
+            .hero-text-box h1 {
+                font-size: 2rem;
+            }
+            .hero-text-box p {
+                font-size: 1.1rem;
+            }
+            .price-box span {
+                font-size: 2rem;
+            }
+
+            .cta-button {
+                padding: 0.9rem 2rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo-corner-link {
+                top: 0.5rem;
+                left: 0.3rem;
+            }
+
+            .logo-corner-img {
+                height: 60px; /* Smaller on mobile */
+            }
+
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0.5rem;
+                align-items: center; /* Center nav items when stacked */
+                margin: -2.5rem auto; /* Adjust margin for smaller screens */
+            }
+
+            .nav-links {
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0;
+            }
+
+            .nav-links a {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+
+            .dropdown-menu {
+                position: relative; /* Make dropdown flow with content on small screens */
+                width: 100%;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 0;
+            }
+
+            .hero {
+                padding-top: 50px; /* Adjust for smaller header */
+            }
+
+            .hero-main-content {
+                flex-direction: column; /* Stack text and price vertically on smaller screens */
+                gap: 15px;
+            }
+            .hero-text-box {
+                text-align: center; /* Center text when stacked */
+                padding: 15px 20px;
+            }
+            .hero-text-box h1 {
+                font-size: 1.8rem;
+            }
+            .hero-text-box p {
+                font-size: 1rem;
+            }
+            .price-box {
+                padding: 10px 20px;
+            }
+            .price-box span {
+                font-size: 2rem;
+            }
+
+            .cta-button {
+                padding: 0.8rem 1.8rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.5rem 0;
+            }
+
+            .nav-links {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr); /* Two columns for nav items */
+                gap: 0.3rem;
+                width: 100%;
+            }
+
+            .nav-links a {
+                font-size: 0.6rem;
+                padding: 0.2rem 0.3rem;
+                text-align: center;
+            }
+
+            .dropdown-menu {
+                position: relative;
+                width: 100%;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 0;
+            }
+
+            .hero-text-box h1 {
+                font-size: 1.5rem; /* Even smaller hero title on very small screens */
+            }
+            .hero-text-box p {
+                font-size: 0.9rem;
+            }
+            .price-box span {
+                font-size: 1.8rem;
+            }
+            .cta-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+            /* If you have .section styles, adapt them too */
+            .section {
+                padding: 4rem 1rem; /* Less padding on very small screens */
+            }
+        }
+
+        /* otros styles that were in animacion.css but not in your provided style.css */
+        .boton-turismo {
+            background: linear-gradient(135deg, #ff8c42, #ff6b6b);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .boton-turismo:hover {
+            background: linear-gradient(135deg, #ff6b6b, #ff8c42);
+            transform: scale(1.05);
+        }
+
+        /* Additional styles for section content */
+     .luna {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 5rem auto; /* Esto establece margen superior e inferior de 5rem, y centra horizontalmente */
+
+    /* ¡Ajusta solo el margen superior para subir la sección! */
+    margin-top: -20rem; /* Mantén este ajuste si es necesario para tu diseño general */
+
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.luna h2, .luna h3, .luna h4 {
+    font-family: 'Playfair Display', serif;
+    color: #333;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.luna h2 {
+    font-size: 2.2rem;
+    color: #2c3e50;
+    margin-top: 2rem;
+}
+
+.luna h3 {
+    font-size: 1.8rem;
+    color: #34495e;
+    margin-top: 1.5rem;
+}
+
+.luna h4 {
+    font-size: 1.5rem;
+    color: #555;
+    margin-top: 1rem;
+}
+
+.luna p {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    color: #666;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    text-align: justify;
+}
+
+.luna p strong {
+    color: #e67e22;
+}
+
+.luna img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: block; /* Ensures images behave as block elements for margin */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.luna a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.luna a:hover {
+    text-decoration: underline;
+}
+
+.elementos_1, .elementos_2, .elementos_3 {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.elementos_1 h3, .titulo h3, .elementos_3-titulo h3 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.6rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.elementos_1-content p, .elementos_2-aling p, .elementos_3-content p {
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 0.8rem;
+}
+
+.elementos_1-content img, .imagenes-aling {
+    width: 100%;
+    max-width: 500px; /* Limit width of itinerary images */
+    height: auto;
+    display: block;
+    margin: 1rem auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- NUEVOS ESTILOS PARA EL CONTENEDOR DE LA IMAGEN (trek-container) --- */
+.trek-container {
+    max-width: 1000px;
+    /* --- MODIFICA ESTA LÍNEA --- */
+    margin: 150px auto 20px auto; /* top, right, bottom, left. Ajusta 150px. */
+    /* O de forma más específica: */
+    /* margin-top: 150px; */
+    /* margin-right: auto; */
+    /* margin-bottom: 20px; */
+    /* margin-left: auto; */
+    /* --- FIN DE LA MODIFICACIÓN --- */
+    background-color: white;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+}
+/* Opcional: Estilos para el título dentro de trek-container para que sea más legible */
+.trek-container h2 {
+    font-family: 'Playfair Display', serif; /* Usar una fuente de título si lo deseas */
+    font-size: 2.2rem;
+    color: #16384c; /* Color del texto del título */
+    margin-bottom: 1.5rem; /* Espacio debajo del título */
+    text-align: center; /* Asegura que el título esté centrado */
+}
+
+/* Opcional: Estilos para los párrafos dentro de trek-container */
+.trek-container p {
+    font-family: 'Lora', serif; /* Usar una fuente de cuerpo de texto */
+    font-size: 1.1rem;
+    color: #333;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    text-align: justify; /* Justificar el texto para una mejor lectura */
+}
+
+/* Opcional: Estilos para las listas dentro de trek-container (como la de las opciones de tour) */
+.trek-container ul {
+    list-style: disc; /* Puntos de lista */
+    margin-left: 20px; /* Sangría para las listas */
+    margin-bottom: 1rem;
+}
+
+.trek-container ul li {
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+        /* Specific adjustments for price box positioning on larger screens */
+        @media (min-width: 769px) {
+            .price-box {
+                /* Reset these if they cause issues with flex positioning */
+                top: auto;
+                left: auto;
+                /* Add more specific values if needed to fine-tune placement */
+                margin-left: 20px; /* Example: space to the left of the price box */
+            }
+        }
+
+        /* New styles for the two-column layout */
+        .content-layout {
+            display: flex;
+            flex-direction: row; /* Default to row for larger screens */
+            gap: 2rem; /* Space between columns */
+            margin-top: 2rem;
+        }
+
+        .main-column {
+            flex: 2; /* Takes 2 parts of the available space */
+            min-width: 65%; /* Ensure it takes a good portion of the width */
+        }
+
+        .sidebar {
+            flex: 1; /* Takes 1 part of the available space */
+            min-width: 30%; /* Ensure it takes a good portion of the width */
+            background-color: #e8f5e9; /* Light green background */
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky; /* Makes sidebar sticky */
+            top: 100px; /* Adjust based on header height */
+            align-self: flex-start; /* Aligns to the start of the cross axis */
+            margin-top: 2rem; /* Added margin-top to align with the main column */
+        }
+
+        .sidebar h4 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.3rem;
+            color: #2e7d32; /* Darker green for headings */
+            margin-bottom: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .sidebar .price-details {
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .sidebar .price-details p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .sidebar .price-details span.main-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1b5e20; /* Even darker green for price */
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-family: 'Lato', sans-serif;
+        }
+
+        .sidebar .price-table th,
+        .sidebar .price-table td {
+            border: 1px solid #c8e6c9; /* Light green border */
+            padding: 0.7rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .sidebar .price-table th {
+            background-color: #a5d6a7; /* Medium green background */
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .sidebar .price-table tr:nth-child(even) {
+            background-color: #f0fdf0; /* Very light green for even rows */
+        }
+
+        .sidebar .contact-button {
+            display: block;
+            width: 100%;
+            padding: 0.8rem 1.5rem;
+            background-color: #4caf50; /* Green button */
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar .contact-button:hover {
+            background-color: #388e3c; /* Darker green on hover */
+        }
+
+        .sidebar p {
+            font-size: 0.9rem;
+            color: #777;
+            text-align: justify;
+            margin-top: 1rem;
+            font-family: 'Lato', sans-serif;
+        }
+
+        /* Responsive adjustments for two-column layout */
+        @media (max-width: 992px) {
+            .content-layout {
+                flex-direction: column; /* Stack columns vertically on smaller screens */
+                gap: 1.5rem;
+            }
+            .main-column, .sidebar {
+                flex: none; /* Remove flex sizing */
+                width: 100%; /* Take full width */
+                min-width: unset; /* Remove min-width constraint */
+            }
+            .sidebar {
+                position: static; /* Remove sticky positioning on small screens */
+                margin-top: 0;
+            }
+        }
+
+/* --- ESTILOS DEL FOOTER --- */
+.footer-container {
+    background-color: #333;
+    color: #fff;
+    padding: 40px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 20px;
+    align-items: flex-start; /* Alinea los items al inicio */
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+}
+
+/* Hace que la sección de plugins sociales sea más ancha */
+.footer-section.social-plugins-section {
+    flex: 1.5; /* Permite que esta sección crezca más */
+    max-width: 620px; /* Ancho máximo para acomodar ambos plugins */
+}
+
+
+.footer-section h3 {
+    color: #fff;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #555;
+    padding-bottom: 10px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 10px;
+}
+
+.footer-section ul li a {
+    color: #ccc;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+    color: #fff;
+}
+
+.social-icons {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.social-icons a {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.social-icons a:hover {
+    transform: scale(1.15);
+}
+
+.social-icons img {
+    width: 30px;
+    height: 30px;
+    display: block;
+}
+
+.contact-info p {
+    margin-bottom: 10px;
+    color: #ccc;
+}
+
+.contact-info a {
+    color: #ccc;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-info a:hover {
+    color: #fff;
+}
+
+.copyright-bar {
+    background-color: #222;
+    color: #ccc;
+    text-align: center;
+    padding: 15px 20px;
+    font-size: 0.9em;
+}
+
+/* Contenedor para los plugins de FB y TikTok */
+.social-plugins-container {
+    display: flex;
+    flex-direction: row; /* Coloca los elementos uno al lado del otro */
+    gap: 15px; /* Espacio entre los plugins */
+}
+
+
+.facebook-plugin, .tiktok-plugin {
+    flex: 1; /* Cada plugin ocupa la mitad del espacio disponible */
+    background-color: #444;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    min-width: 0; /* Importante para que flexbox funcione correctamente */
+}
+
+.tiktok-embed {
+    max-width: 100% !important;
+    min-width: unset !important;
+    margin: 0 auto !important;
+    box-sizing: border-box;
+}
+.elementos_3-content ul {
+    width: 90%;
+    max-width: 700px;
+    margin: 0 auto;
+    list-style-position: inside;
+    padding-left: 0;
+     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; 
+}
+
+.elementos_3-content ul li {
+    text-align: flex;
+    font-family: 'Lato', sans-serif; /* Aplica la fuente a cada elemento de la lista */
+    font-size: 1.1rem; /* Opcional: ajusta el tamaño de la fuente para mejor legibilidad */
+    line-height: 1.6; /* Opcional: ajusta el interlineado para mejor legibilidad */
+}
+
+   
