@@ -1,65 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Inject chatbot HTML into body
-    const chatHTML = `
-        <div id="chatbot-container">
-            <button id="chat-btn">💬</button>
-            <div id="chat-window">
-                <div id="chat-header">
-                    <h3>Zenix - SDK FINIX</h3>
-                    <button id="chat-close">✖</button>
-                </div>
-                <div id="chat-body" class="chat-body">
-                    <div class="msg bot">¡Hola! 👋 Soy <strong>Zenix</strong>, tu asistente virtual de SDK FINIX. ¿En qué puedo ayudarte hoy?</div>
-                    <div class="faq-buttons">
-                        <button class="faq-btn">Reparación PC</button>
-                        <button class="faq-btn">Desarrollo Web</button>
-                        <button class="faq-btn">Cambio Pantalla Celular</button>
-                        <button class="faq-btn">¿Cuánto cuesta?</button>
-                        <button class="faq-btn">Ubicación y Horario</button>
-                        <button class="faq-btn">Laptop no prende</button>
-                    </div>
-                </div>
-                <div id="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." />
-                    <button id="chat-send">▶</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', chatHTML);
 
-    const chatBtn = document.getElementById('chat-btn');
-    const chatWindow = document.getElementById('chat-window');
-    const chatClose = document.getElementById('chat-close');
-    const chatInput = document.getElementById('chat-input');
-    const chatSend = document.getElementById('chat-send');
-    const chatBody = document.getElementById('chat-body');
+    // ==================== CONFIGURACIÓN GROQ ====================
+    const GROQ_API_KEY = "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";
+    const MODEL = "llama-3.1-8b-instant";   // Modelo rápido y con buen límite
 
-    chatBtn.addEventListener('click', () => {
-        chatWindow.classList.toggle('active');
-        if (chatWindow.classList.contains('active')) {
-            chatInput.focus();
-        }
-    });
-
-    chatClose.addEventListener('click', () => {
-        chatWindow.classList.remove('active');
-    });
-
-    // Handle FAQ buttons
-    document.querySelectorAll('.faq-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const text = e.target.innerText;
-            chatInput.value = text;
-            sendMessage();
-        });
-    });
-
-    // ============================================================
-    //   BASE DE CONOCIMIENTO DEL BOT - SDK FINIX
-    // ============================================================
+    // ==================== BASE DE CONOCIMIENTO (Tus respuestas) ====================
     const botResponses = {
-
         // --- CREADOR ---
         "quien te creo": "Fui desarrollado por un programador súper entusiasta, apasionado por la tecnología y la innovación, que volcó todo su talento y dedicación para traerme al mundo digital. Una mente brillante que convierte ideas en código impecable. ¡Y aquí estoy, listo para servir en SDK FINIX! 🚀✨",
         "quien es tu creador": "Mi creador es un desarrollador extraordinario, con una mente analítica y creativa fuera de lo común. Un artesano del código que construyó cada línea de mi lógica con precisión y pasión. ¡SDK FINIX tiene el mejor equipo técnico del universo! 🧠💻",
@@ -104,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "fotocopiadora marca rayas": "📠 Las rayas en fotocopias casi siempre son por el tambor fotoconductor desgastado o suciedad en el cristal de escaneo. El tambor se cambia y el cristal se limpia con cuidado con químico especial. ¡Lo hacemos nosotros!",
         "fotocopiadora toner": "📠 Vendemos y cambiamos tóner para fotocopiadoras de todas las marcas. Tenemos opciones originales y compatibles de alta calidad. Dinos la marca y modelo para verificar disponibilidad.",
 
-        // --- PANTALLAS (CELULAR/TABLET/LAPTOP) ---
+        // --- PANTALLAS ---
         "pantalla en negro": "📱 Pantalla negra puede tener varias causas:\n• Batería completamente descargada (cargarla 30 min)\n• Pantalla LCD quebrada internamente\n• Falla en la placa o flex de video\n• Problema de software (loop de reinicio)\n\n¿Es celular, tablet o laptop? ¿El equipo vibra o suena cuando lo enciendes?",
         "pantalla negra": "📱 Si la pantalla está totalmente negra pero el equipo enciende (vibra/suena), muy probablemente el panel LCD u OLED está dañado. Necesitas cambio de pantalla. En SDK FINIX usamos repuestos de calidad original con garantía.",
         "pantalla rota": "💥 ¡Tranquilo/a! Cambiamos pantallas rotas el mismo día. Tenemos repuestos para Samsung, iPhone, Xiaomi, Motorola, Huawei, OPPO, Realme y más. Dime el modelo exacto y te doy precio inmediato.",
@@ -121,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         "mi laptop no prende": "💻 Laptop apagada totalmente: Conéctala y fíjate si enciende el LED de carga. Si no, el cargador o el conector interno fallaron. En SDK FINIX reparamos pines de carga, placas madre y hacemos reballing de chips.",
         "reparacion pc": "🖥️ Reparamos PCs de escritorio: diagnóstico general, cambio de fuente, placa madre, RAM, discos, tarjetas de video, y ensamblaje completo. También hacemos mantenimiento preventivo. ¿Qué le pasa a tu PC?",
         "pc pantalla negra": "🖥️ PC que enciende (suenan ventiladores) pero sin imagen:\n• En el 80% de los casos es polvo en las ranuras de la Memoria RAM.\n• También puede ser la Tarjeta de Video o el monitor mismo.\n• Verifica que el cable HDMI/VGA esté bien conectado.\n\n¡Tráela y hacemos el diagnóstico gratis!",
-        "pantalla negra pc": "🖥️ PC prendida, monitor negro: Primero revisa que el cable del monitor esté bien apretado. Si ese no es el problema, requiere diagnóstico avanzado. En SDK FINIX aplicamos limpieza de contactos y revisión de componentes.",
         "mi pc esta lenta": "🐌 ¿Tarda 10 minutos en iniciar? ¡La solución es un Disco de Estado Sólido (SSD)! Clonamos tu información del disco viejo al nuevo y tu PC quedará 10 veces más rápida. Sin pérdida de datos. ¡Es una promesa! 🚀",
         "pc lenta": "🐌 PC lenta = Disco duro HDD obsoleto + Poca RAM + Posible infección por virus. Te ofrecemos el paquete definitivo: SSD + Ampliación de RAM + Formateo limpio = ¡PC voladora garantizada!",
         "laptop lenta": "🐌 Laptop lenta: Lo mismo que una PC. El SSD es la solución más impactante. Además, un buen mantenimiento físico (limpieza de ventiladores y cambio de pasta térmica) la hace funcionar como nueva.",
@@ -129,121 +74,152 @@ document.addEventListener('DOMContentLoaded', () => {
         "pc se apaga": "🔥 Apagones repentinos = Sobrecalentamiento o Fuente de Poder fallando. No la sigas usando así, podrías quemar el procesador o la placa madre. ¡Tráela de urgencia a SDK FINIX!",
         "laptop se apaga": "🔥 Laptop que se apaga sola: Casi siempre es por acumulación de polvo en los ventiladores y pasta térmica seca. Lo solucionamos con mantenimiento físico completo. ¡Antes de que se dañe la placa!",
         "virus": "🦠 ¿Publicidad molesta, lentitud extrema o cuentas hackeadas? Tienes virus o malware.\nHacemos limpieza profunda del sistema o, si es necesario, respaldamos tu información y reinstalamos Windows desde cero. Seguridad total garantizada. 🛡️",
-        "windows": "🪟 Instalamos Windows 10 u 11 con activación, todos los drivers del equipo, Office, PDF y antivirus. Todo listo para trabajar desde el primer minuto. ¿Necesitas formateo también?",
-        "formateo": "🪟 Realizamos formateo completo: respaldo de datos, reinstalación de Windows 10/11, drivers, Office y programas básicos. Tu equipo queda como nuevo. ¿Para PC o Laptop?",
-        "memoria ram": "💾 Ampliamos la memoria RAM de tu laptop o PC. Más RAM = más fluidez al trabajar con muchos programas a la vez. Dime el modelo de tu equipo para verificar compatibilidad y precio.",
-        "disco duro": "💿 Cambiamos discos duros HDD por unidades de estado sólido SSD. También recuperamos información de discos dañados. ¡No pierdas tus fotos y documentos! Traenos el disco.",
-        "ssd": "💿 Instalamos discos SSD en laptops y PCs de cualquier marca. El cambio de HDD a SSD es la mejora #1 que puedes hacerle a tu equipo. Velocidad de inicio: de 3 minutos a 10 segundos. ¡Increíble diferencia!",
-        "teclado laptop": "⌨️ Cambiamos teclados de laptops rotos o con teclas que no responden. Tenemos repuestos para casi todas las marcas (HP, Dell, Lenovo, Asus, Acer). Dime la marca y modelo.",
-        "bisagra laptop": "🔧 Reparamos y reforzamos bisagras rotas de laptops. Una bisagra dañada puede romper el chasis si no se atiende a tiempo. ¡Lo soldamos o reinstalamos el soporte correctamente!",
-        "bateria laptop": "🔋 Cambiamos baterías de laptops que ya no duran o no cargan. Tenemos baterías originales y de alta capacidad. Dinos la marca y modelo de tu laptop.",
 
         // --- CELULARES ---
         "celular": "📲 Reparamos celulares de todas las marcas: Samsung, iPhone, Xiaomi, Motorola, Huawei, OPPO, Realme y más. Cambio de pantalla, batería, pin de carga, cámara y solución de problemas de software. ¿Qué falla tiene tu celular?",
         "celular no carga": "🔌 Celular que no carga: Puede ser el cable (prueba con otro), el adaptador, o el pin de carga sucio/dañado. Si con otro cable tampoco carga, el conector interno necesita limpieza o cambio. ¡Lo reparamos!",
         "mi celular no carga": "🔌 Primero prueba limpiando el puerto con un palillo de dientes con suavidad. Si no mejora, el pin de carga interno está dañado y hay que cambiarlo. ¡Es una reparación rápida y económica en SDK FINIX!",
         "celular no enciende": "📱 Celular que no enciende:\n• Cárgalo por 30 minutos sin interrumpir.\n• Intenta reinicio forzado (Encendido + Volumen Abajo por 10 segundos).\n• Si nada funciona, puede ser la batería agotada o un problema de placa.\n\n¿De qué marca y modelo es?",
-        "mi celular no enciende": "📱 Si no enciende para nada ni responde al cargador, puede ser: batería muerta, pin de carga roto, o un corto en la placa. Tráelo y hacemos diagnóstico gratuito para saber exactamente qué tiene.",
         "celular se calienta": "🔥 Celular con temperatura alta puede ser por:\n• App descontrolada corriendo en fondo\n• Batería hinchada (peligroso, actúa rápido)\n• Chip de procesador con problema\n\nSi la parte trasera está abultada, es la batería. ¡No la cargues más y tráela de urgencia!",
-        "bateria celular": "🔋 Cambiamos baterías de celulares de todas las marcas (Samsung, iPhone, Xiaomi, etc.). Si tu celular dura menos de 2 horas o se apaga con batería restante, necesita batería nueva. ¿Qué modelo tienes?",
-        "camara celular": "📷 Reparamos cámaras de celulares: lentes rotos, cámara que no enfoca, imagen borrosa o cámara que no abre. Dinos la marca y modelo para darte más detalles.",
-        "celular mojado": "💧 Celular mojado: ¡Apágalo YA y no lo cargues! Colócalo en arroz seco por 24-48 horas. Si no enciende después, tráelo para limpieza ultrasónica interna de los componentes. ¡No esperes más tiempo!",
-        "iphone": "🍎 Reparamos iPhones de todas las generaciones: cambio de pantalla, batería, botones, cámara y problemas de software. ¿Qué modelo de iPhone tienes y qué le pasa?",
-        "samsung": "📱 Reparamos Samsung de toda la gama: S, A, M, Note, Galaxy. Pantallas OLED y LCD, baterías, pines de carga y placas. ¿Qué modelo Samsung tienes?",
-        "xiaomi": "📱 Reparamos Xiaomi, Redmi y POCO. Cambio de pantallas, baterías, pines y más. ¿Qué modelo tienes?",
 
-        // --- TABLET ---
-        "tablet": "📱 Reparamos tablets: iPad, Samsung Galaxy Tab, Lenovo, Amazon Fire, Huawei MatePad. Cambio de pantallas, conectores de carga, baterías y desbloqueo de software. ¿Que problema tiene tu tablet?",
-        "tablet no carga": "🔌 Si la tablet no carga, primero prueba con otro cable y adaptador. Si tiene polvo en el puerto, límpialo suavemente. Si sigue sin cargar, el conector interno necesita reemplazo. ¡Lo reparamos!",
-        "ipad": "🍎 Reparamos iPads: mini, Air, Pro y generaciones estándar. Cambio de pantalla, batería, botones y más. ¿Qué modelo de iPad es y qué le pasa?",
+        // --- DESARROLLO ---
+        "desarrollo web": "🌐 Diseñamos y desarrollamos páginas web profesionales: Landing Pages, Portales Corporativos, Tiendas Online con carrito de compra y pagos. Todas responsivas y rápidas. ¿Qué tipo de página necesitas?",
+        "pagina web": "🌐 Creamos tu página web a medida. ¿Tienes una marca o negocio? Te diseñamos un sitio que impresione a tus clientes.",
+        "tienda online": "🛒 Creamos tu tienda en línea completa con carrito, pagos y gestión de pedidos. ¡Empieza a vender por internet hoy!",
 
-        // --- REDES E INTERNET ---
-        "no hay internet": "🌐 Si tu PC no tiene internet pero el celular sí:\n• Revisar que el cable de red esté bien conectado.\n• Reiniciar el módem y el router.\n• Si es por WiFi, instalar o actualizar el driver de la tarjeta de red.\n\n¡Te ayudamos a diagnosticarlo!",
-        "wifi no conecta": "📡 Si el WiFi no conecta en tu laptop:\n• Verifica que el WiFi esté activado (muchas laptops tienen tecla Fn+F2).\n• Si otras redes tampoco aparecen, la tarjeta de red interna falla.\n• Solución rápida: adaptador USB WiFi (económico y efectivo).",
-        "cable de red": "🔌 Fabricamos cables de red (Cat 5e, Cat 6) a la medida exacta que necesitas, con conectores RJ45 que garantizan la mejor velocidad. ¡Dinos cuántos metros necesitas!",
-        "internet lento": "🌐 Internet lento en la PC puede ser por el cable, el adaptador WiFi, configuración del DNS o virus. Lo diagnosticamos y aplicamos la solución más rápida. ¿Es por cable o WiFi?",
-
-        // --- DESARROLLO WEB Y SOFTWARE ---
-        "desarrollo web": "🌐 Diseñamos y desarrollamos páginas web profesionales: Landing Pages, Portales Corporativos, Tiendas Online (E-commerce) con carrito de compra y pagos. Todas Responsivas, rápidas y con SEO. ¡Haz que el mundo te encuentre!",
-        "pagina web": "🌐 Creamos tu página web a medida. ¿Tienes una marca, empresa o negocio? Te diseñamos un sitio web que impresione a tus clientes. ¿Qué tipo de página necesitas?",
-        "tienda online": "🛒 Creamos tu tienda en línea (E-commerce) con catálogo de productos, carrito de compras, pagos en línea y gestión de pedidos. ¡Empieza a vender por internet hoy mismo!",
-        "sistema de ventas": "🛒 Desarrollamos Sistemas de Punto de Venta (POS) completos: control de inventario, facturación, caja, reportes de ganancias y gestión de empleados. ¡Perfecto para tiendas, restaurantes y negocios!",
-        "aplicacion movil": "📱 Programamos Apps Móviles para Android e iOS. Si tienes una idea de negocio o necesitas una aplicación para tu empresa, la desarrollamos desde cero con tecnología moderna.",
-        "app movil": "📱 Desarrollamos aplicaciones móviles nativas e híbridas. Desde apps de delivery, reservas, catálogos hasta sistemas completos de gestión empresarial para tu celular.",
-        "software a medida": "⚙️ Construimos software de escritorio o web exactamente como lo necesitas: sistemas de inventario, control de personal, facturación, clínicas, ferreterías, restaurantes y más. ¡Cuéntanos tu idea!",
-        "desarrollo": "💻 En SDK FINIX desarrollamos tecnología a medida: páginas web, sistemas de ventas, apps móviles y software de escritorio. ¡Automatiza tu negocio con nosotros!",
-        "sistema inventario": "⚙️ Desarrollamos sistemas de inventario personalizados para controlar tu stock, entradas, salidas y alertas de reabastecimiento. ¡Nada se pierde ni se descontrola con nuestro sistema!",
-
-        // --- PRECIOS Y COTIZACIONES ---
-        "precio": "💰 El precio varía según el repuesto y la marca del equipo. Dinos la marca y modelo exacto de tu dispositivo y te damos la cotización en minutos. También puedes escribirnos por WhatsApp.",
-        "cuanto cuesta": "💰 Para darte el precio exacto necesito saber: ¿Qué es lo que se dañó? y ¿Cuál es la marca y modelo de tu equipo? Con eso te cotizo de inmediato, sin costos ocultos.",
-        "es caro": "💰 En SDK FINIX manejamos precios justos y competitivos. Siempre te ofrecemos opciones: repuesto original y repuesto genérico de buena calidad, para que elijas según tu presupuesto. ¡Sin sorpresas!",
-        "tienen garantia": "✅ ¡Sí! Todos nuestros servicios y repuestos tienen garantía. Tu inversión está protegida con nosotros. La garantía varía según el tipo de servicio.",
-        "garantia": "✅ ¡Claro que sí! En SDK FINIX damos garantía en todos nuestros servicios de reparación y en los desarrollos de software. Trabajamos con responsabilidad y compromiso.",
-
-        // --- UBICACIÓN, HORARIO Y CONTACTO ---
-        "ubicacion": "📍 Contamos con servicio presencial, a domicilio y también atención remota para problemas de software. Escríbenos por WhatsApp o el formulario de contacto y te enviamos la ubicación exacta.",
-        "ubicacion y horario": "📍⏰ Atendemos de Lunes a Sábado de 9:00 AM a 6:30 PM. Tenemos servicio presencial, a domicilio y remoto. ¡Escríbenos y coordinamos!",
-        "donde estan": "📍 Estamos disponibles en línea y en físico. Para la dirección exacta, escríbenos al WhatsApp o en la sección de Contacto del sitio y te la enviamos de inmediato.",
-        "horario": "⏰ Trabajamos de Lunes a Sábado, 9:00 AM a 6:30 PM. Para emergencias técnicas urgentes, contáctanos de todas formas y buscamos la manera de ayudarte.",
-        "whatsapp": "📱 Puedes contactarnos directamente por WhatsApp para cotizaciones, consultas y coordinar la entrega de tu equipo. ¡Ve a la sección de Contacto para el número!",
-        "contacto": "📞 Para contactarnos, visita la sección de Contacto en nuestra página web. Puedes enviarnos un mensaje por el formulario o por WhatsApp y te responderemos a la brevedad.",
+        // --- PRECIOS Y CONTACTO ---
+        "precio": "💰 El precio varía según el repuesto y modelo. Dime la marca y modelo exacto de tu equipo y te cotizo de inmediato.",
+        "cuanto cuesta": "💰 Para darte el precio exacto necesito la marca y modelo de tu equipo. ¿Qué se dañó?",
+        "garantia": "✅ Todos nuestros servicios y repuestos tienen garantía. Tu inversión está protegida.",
+        "ubicacion": "📍 Escríbenos por WhatsApp o en la sección Contacto para enviarte la ubicación exacta.",
+        "ubicacion y horario": "📍⏰ Atendemos de Lunes a Sábado de 9:00 AM a 6:30 PM. Servicio presencial, a domicilio y remoto.",
 
         // --- AYUDA GENERAL ---
-        "ayuda": "🆘 ¡Claro! Dime qué necesitas:\n• Reparación de PC/Laptop\n• Cambio de pantalla (celular/tablet/laptop)\n• Impresora o Fotocopiadora\n• Desarrollo de página web o software\n• Precios y cotizaciones\n\n¡Estoy listo para ayudarte!",
-        "servicios": "🛠️ En SDK FINIX ofrecemos:\n💻 Reparación de PCs, Laptops, Celulares y Tablets\n🖨️ Servicio técnico de Impresoras y Fotocopiadoras\n🌐 Desarrollo de Páginas Web y Software\n📱 Apps Móviles\n\n¿Cuál te interesa?",
+        "ayuda": "🆘 ¡Claro! Dime qué necesitas:\n• Reparación de PC/Laptop\n• Cambio de pantalla\n• Impresora o Fotocopiadora\n• Desarrollo de página web\n• Precios y cotizaciones\n\n¡Estoy aquí para ayudarte!",
+        "servicios": "🛠️ Ofrecemos reparación de PCs, laptops, celulares, impresoras, fotocopiadoras y desarrollo de páginas web y software.",
 
         // --- DEFAULT ---
-        "default": "🤖 Mmm, no estoy seguro de entender exactamente tu consulta. ¡Pero no te preocupes!\n\nEn SDK FINIX atendemos:\n🔧 Reparación de PCs, Laptops, Celulares, Impresoras\n🌐 Desarrollo Web y Software a Medida\n\nPrueba preguntando algo como:\n• \"Mi pantalla está negra\"\n• \"Mi laptop no prende\"\n• \"Quiero una página web\"\n• \"Cuánto cuesta cambiar la pantalla\"\n\n¡Te respondo de inmediato! 😊"
+        "default": "🤖 Mmm, no estoy 100% segura... pero déjame consultar mi inteligencia avanzada."
     };
 
-    // ============================================================
-    //   EVALUADOR MATEMATICO
-    // ============================================================
-    function evaluateMath(expression) {
-        const match = expression.match(/([0-9]+(?:\.[0-9]+)?)\s*([+\-*/xX])\s*([0-9]+(?:\.[0-9]+)?)/);
-        if (!match) return null;
-        const a = parseFloat(match[1]);
-        const op = match[2].toLowerCase();
-        const b = parseFloat(match[3]);
-        let res = 0;
-        switch (op) {
-            case '+': res = a + b; break;
-            case '-': res = a - b; break;
-            case '*': case 'x': res = a * b; break;
-            case '/': res = b !== 0 ? a / b : 'Error (div / 0)'; break;
-        }
-        if (typeof res === 'number' && !Number.isInteger(res)) {
-            res = parseFloat(res.toFixed(4));
-        }
-        return res;
+    // ==================== INYECTAR HTML DEL CHAT ====================
+    const chatHTML = `
+        <div id="chatbot-container">
+            <button id="chat-btn">💬</button>
+            <div id="chat-window">
+                <div id="chat-header">
+                    <h3>Zenix - SDK FINIX</h3>
+                    <button id="chat-close">✖</button>
+                </div>
+                <div id="chat-body" class="chat-body">
+                    <div class="msg bot">¡Hola! 👋 Soy <strong>Zenix</strong>, tu asistente virtual de SDK FINIX. ¿En qué puedo ayudarte hoy?</div>
+                    <div class="faq-buttons">
+                        <button class="faq-btn">Reparación PC</button>
+                        <button class="faq-btn">Desarrollo Web</button>
+                        <button class="faq-btn">Cambio Pantalla Celular</button>
+                        <button class="faq-btn">¿Cuánto cuesta?</button>
+                        <button class="faq-btn">Ubicación y Horario</button>
+                        <button class="faq-btn">Laptop no prende</button>
+                    </div>
+                </div>
+                <div id="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." />
+                    <button id="chat-send">▶</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', chatHTML);
+
+    const chatBtn = document.getElementById('chat-btn');
+    const chatWindow = document.getElementById('chat-window');
+    const chatClose = document.getElementById('chat-close');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    const chatBody = document.getElementById('chat-body');
+
+    chatBtn.addEventListener('click', () => {
+        chatWindow.classList.toggle('active');
+        if (chatWindow.classList.contains('active')) chatInput.focus();
+    });
+
+    chatClose.addEventListener('click', () => chatWindow.classList.remove('active'));
+
+    document.querySelectorAll('.faq-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            chatInput.value = btn.innerText;
+            sendMessage();
+        });
+    });
+
+    // ==================== FUNCIÓN PARA OBTENER HORA EXACTA EN CUALQUIER PAÍS ====================
+    function getTimeInCountry(country) {
+        const timeZones = {
+            "peru": "America/Lima",
+            "perú": "America/Lima",
+            "méxico": "America/Mexico_City",
+            "mexico": "America/Mexico_City",
+            "españa": "Europe/Madrid",
+            "espana": "Europe/Madrid",
+            "argentina": "America/Argentina/Buenos_Aires",
+            "chile": "America/Santiago",
+            "colombia": "America/Bogota",
+            "ecuador": "America/Guayaquil",
+            "bolivia": "America/La_Paz",
+            "estados unidos": "America/New_York",
+            "usa": "America/New_York",
+            "united states": "America/New_York",
+            "brasil": "America/Sao_Paulo",
+            "francia": "Europe/Paris",
+            "italia": "Europe/Rome",
+            "japón": "Asia/Tokyo",
+            "japon": "Asia/Tokyo",
+            "china": "Asia/Shanghai",
+            "corea": "Asia/Seoul",
+            "inglaterra": "Europe/London",
+            "londres": "Europe/London"
+        };
+
+        const zone = timeZones[country.toLowerCase()] || "America/Lima";
+
+        const options = {
+            timeZone: zone,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        };
+
+        const now = new Date();
+        const hora = now.toLocaleTimeString('es-PE', options);
+        const ciudad = country.charAt(0).toUpperCase() + country.slice(1);
+
+        return `🕒 La hora exacta en **${ciudad}** es: **${hora}**`;
     }
 
-    // ============================================================
-    //   PROCESADOR DE MENSAJES
-    // ============================================================
-    function processMessage(msg) {
-        let txt = msg.toLowerCase().trim();
+    // ==================== BUSCAR RESPUESTA LOCAL ====================
+    function getLocalResponse(msg) {
+        const txt = msg.toLowerCase().trim();
 
-        // 1. Evaluar matematica
-        const mathResult = evaluateMath(txt);
-        if (mathResult !== null) {
-            return `🔢 El resultado es: ${mathResult}`;
+        // === DETECTAR PREGUNTAS DE HORA EN DIFERENTES PAÍSES ===
+        if (txt.includes("hora") || txt.includes("qué hora") || txt.includes("hora en")) {
+            
+            // Pregunta específica por país
+            if (txt.includes("hora en")) {
+                const pais = txt.split("hora en")[1].trim().replace("?", "").replace("es", "").trim();
+                if (pais) return getTimeInCountry(pais);
+            }
+
+            // Preguntas generales sobre hora
+            if (txt.includes("peru") || txt.includes("perú") || txt.includes("lima")) {
+                return getTimeInCountry("peru");
+            }
+            
+            // Si solo dice "qué hora es" → por defecto Perú
+            return getTimeInCountry("peru");
         }
 
-        // 2. Combinaciones especiales
-        if (txt.includes("celular") && txt.includes("pantalla")) {
-            return "📱 Realizamos reemplazo de pantalla para celulares de todas las marcas. Usamos repuestos originales y premium con garantía. ¿Cuál es la marca y modelo exacto de tu celular?";
-        }
-        if (txt.includes("laptop") && txt.includes("pantalla")) {
-            return "💻 Cambiamos pantallas de laptops de todas las marcas. Dinos la marca y modelo exacto (ej: HP 15-da, Dell Inspiron 15, Lenovo IdeaPad 3) para cotizarte.";
-        }
-        if (txt.includes("tablet") && txt.includes("pantalla")) {
-            return "📱 Cambiamos pantallas de tablets. Dinos la marca y modelo exacto (iPad Air 4, Galaxy Tab A8, Lenovo M10) para cotizarte.";
-        }
-
-        // 3. Busqueda por palabras clave (de mas especificas a mas generales)
-        // Ordenar las keys por longitud descendente para preferir coincidencias mas largas
+        // === OTRAS RESPUESTAS LOCALES ===
         const keys = Object.keys(botResponses).filter(k => k !== 'default');
         keys.sort((a, b) => b.length - a.length);
 
@@ -252,17 +228,65 @@ document.addEventListener('DOMContentLoaded', () => {
                 return botResponses[key];
             }
         }
-
-        return botResponses["default"];
+        return null; // null = usar Groq
     }
 
-    // ============================================================
-    //   FUNCIONES DE CHAT
-    // ============================================================
+    // ==================== ENVIAR MENSAJE ====================
+    async function sendMessage() {
+        const rawText = chatInput.value.trim();
+        if (!rawText) return;
+
+        addMessage(rawText, 'user');
+        chatInput.value = '';
+
+        const typingEl = showTyping();
+
+        const localReply = getLocalResponse(rawText);
+
+        if (localReply) {
+            typingEl.remove();
+            addMessage(localReply, 'bot');
+        } 
+        else {
+            // Usar Groq solo cuando sea necesario
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${GROQ_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: MODEL,
+                        messages: [
+                            { 
+                                role: "system", 
+                                content: "Eres Zenix, asistente virtual cyberpunk de SDK FINIX. Habla en español con energía, usa emojis y sé útil." 
+                            },
+                            { role: "user", content: rawText }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 600
+                    })
+                });
+
+                const data = await response.json();
+                const aiReply = data.choices[0].message.content;
+
+                typingEl.remove();
+                addMessage(aiReply, 'bot');
+
+            } catch (error) {
+                typingEl.remove();
+                addMessage("¡Ups! Estoy con mucha demanda ahora 😅 Inténtalo de nuevo en unos segundos.", 'bot');
+            }
+        }
+    }
+
     function addMessage(text, sender) {
         const div = document.createElement('div');
         div.className = `msg ${sender}`;
-        div.innerText = text;
+        div.innerHTML = text;
         chatBody.appendChild(div);
         chatBody.scrollTop = chatBody.scrollHeight;
     }
@@ -276,27 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return div;
     }
 
-    function sendMessage() {
-        const rawText = chatInput.value;
-        if (rawText.trim() === "") return;
-
-        addMessage(rawText, 'user');
-        chatInput.value = '';
-
-        const typingEl = showTyping();
-
-        // Retardo realista segun longitud del mensaje
-        let delay = 1000 + Math.random() * 1000;
-        if (rawText.length > 25) delay = 2000 + Math.random() * 2000;
-        if (rawText.length > 60) delay = 3000 + Math.random() * 4000;
-
-        setTimeout(() => {
-            typingEl.remove();
-            const reply = processMessage(rawText);
-            addMessage(reply, 'bot');
-        }, delay);
-    }
-
+    // Eventos de envío
     chatSend.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
