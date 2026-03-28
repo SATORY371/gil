@@ -1,29 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
   <url>
     <loc>https://satory.nl/</loc>
-    <lastmod>2026-03-26</lastmod>
+    <lastmod>2026-03-28</lastmod>
     <priority>1.00</priority>
   </url>
-
   <url>
-    <loc>https://satory.nl/index.html</loc>
-    <lastmod>2026-03-26</lastmod>
+    <loc>https://satory.nl/about/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://satory.nl/contact/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://satory.nl/services/</loc>
+    <lastmod>2026-03-28</lastmod>
     <priority>0.90</priority>
   </url>
-
-  <!-- Ejemplo de otras páginas (edítalas según tu repo) -->
   <url>
-    <loc>https://satory.nl/about.html</loc>
-    <lastmod>2026-03-26</lastmod>
+    <loc>https://satory.nl/repair-pc/</loc>
+    <lastmod>2026-03-28</lastmod>
     <priority>0.80</priority>
   </url>
-
   <url>
-    <loc>https://satory.nl/contact.html</loc>
-    <lastmod>2026-03-26</lastmod>
+    <loc>https://satory.nl/repair-laptop/</loc>
+    <lastmod>2026-03-28</lastmod>
     <priority>0.80</priority>
   </url>
-
+  <url>
+    <loc>https://satory.nl/repair-mobile/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://satory.nl/repair-printer/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://satory.nl/repair-copier/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://satory.nl/dev-web/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://satory.nl/dev-mobile/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://satory.nl/dev-desktop/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://satory.nl/zenix/</loc>
+    <lastmod>2026-03-28</lastmod>
+    <priority>0.80</priority>
+  </url>
 </urlset>
