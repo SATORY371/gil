@@ -4,79 +4,413 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="IMAGEN/SDK-FINIX.ico">
+
     <!-- SEO Meta Tags -->
-    <title>SDK FINIX</title>
-    <meta name="description" content="SDK FINIX: Reparamos PCs, laptops, celulares, impresoras y fotocopiadoras. Desarrollamos páginas web, programas y apps.">
-    <meta name="keywords" content="soporte técnico, reparación de pc, desarrollo web, sdk finix, tecnología, reparación de equipos">
+    <title>SDK FINIX | El Futuro de la Tecnología</title>
+    <meta name="description" content="Líderes en soporte técnico y soluciones digitales en Cusco. Reparación de hardware, software y desarrollo web premium.">
+    <meta name="keywords" content="soporte técnico, reparación de pc, desarrollo web, sdk finix, tecnología, reparación de equipos, cusco, perú">
     <meta name="author" content="SDK FINIX">
     <meta name="robots" content="index, follow">
 
-    <!-- Open Graph / Redes Sociales -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="SDK FINIX">
-    <meta property="og:description" content="SDK FINIX: Reparamos PCs, laptops, celulares, impresoras y fotocopiadoras. Desarrollamos páginas web, programas y apps.">
+    <meta property="og:description" content="Soporte técnico garantizado y desarrollo de software a medida.">
     <meta property="og:image" content="IMAGEN/SDK-FINIX.ico">
-    <meta property="og:url" content="https://sdkfinix.com/index.html">
+    <meta property="og:url" content="https://sdkfinix.com/">
+
     <link rel="stylesheet" href="style.css">
 
+    <!-- Redirección automática index.html -->
     <script>
         if (window.location.pathname.endsWith("index.html")) {
             window.location.replace(window.location.pathname.replace("index.html", ""));
         }
     </script>
+
+    <style>
+        /* ---- HERO GRID ---- */
+        .hero-grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, black 30%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, black 30%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Section divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 0;
+        }
+
+        /* Stats full-width background */
+        .stats-wrap {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Services section background */
+        .services-wrap {
+            background: var(--bg-base);
+        }
+
+        /* Features section alternates */
+        .features-section {
+            background: var(--bg-surface);
+        }
+
+        /* CTA Banner */
+        .cta-banner {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cta-banner-inner {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 6rem 5%;
+            text-align: center;
+        }
+
+        .cta-banner-inner h2 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.04em;
+        }
+
+        .cta-banner-inner p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.75;
+        }
+
+        .cta-btns {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Feature list items */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .feature-list li::before {
+            content: '';
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            border: 1.5px solid var(--cyan);
+            background: rgba(34,211,238,0.08);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Split layout for feature section */
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 5%;
+        }
+
+        .split-layout .split-img {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .split-layout .split-img::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(34,211,238,0.08) 0%, transparent 70%);
+        }
+
+        .split-text h2 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            letter-spacing: -0.04em;
+        }
+
+        .split-text h2 .accent {
+            background: var(--grad-text);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .split-text p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.75;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .split-layout {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                padding: 4rem 5%;
+            }
+            .split-layout .split-img {
+                max-width: 420px;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+        /* CTA accent text */
+        .cta-accent-text {
+            background: var(--grad-text);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Split image with SDK.png */
+        .split-img-zenix {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            aspect-ratio: 3/4;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .split-img-zenix::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center bottom, rgba(168,85,247,0.2) 0%, transparent 70%);
+        }
+
+        .split-img-zenix img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 0 30px rgba(34,211,238,0.3));
+        }
+    </style>
 </head>
 <body>
-    <video autoplay loop muted playsinline id="bg-video">
-        <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-technology-network-connection-background-27898-large.mp4" type="video/mp4">
-    </video>
-    <div id="bg-overlay"></div>
-    <header>
-        <a href="index.html" class="logo">SDK <span>FINIX</span></a>
-        <nav>
+
+    <!-- ===================== HEADER ===================== -->
+    <header id="header">
+        <a href="index.html" class="logo">
+            <div class="logo-icon">⚡</div>
+            SDK <span>FINIX</span>
+        </a>
+
+        <nav id="nav">
             <ul>
-                <li><a href="index.html">Inicio</a></li>
+                <li><a href="index.html" class="active">Inicio</a></li>
                 <li><a href="services/index.html">Servicios</a></li>
                 <li><a href="about/index.html">Nosotros</a></li>
                 <li><a href="zenix/index.html">Zenix IA</a></li>
                 <li><a href="contact/index.html">Contacto</a></li>
             </ul>
         </nav>
+
+        <div class="nav-cta">
+            <a href="contact/index.html" class="btn btn-outline">Contactar</a>
+            <a href="services/index.html" class="btn">Ver Servicios →</a>
+        </div>
     </header>
 
-    <section class="hero">
-        <div>
-            <h1>El Futuro de la <span>Tecnología</span> a tu Alcance</h1>
-            <p>Expertos en soporte técnico garantizado para todos tus dispositivos electrónicos y soluciones de ingeniería de software a medida para escalar tu negocio al máximo nivel.</p>
-            <a href="services/index.html" class="btn">Conocer y Empezar</a>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" id="inicio">
+        <div class="hero-grid-bg"></div>
+        <div class="hero-inner reveal">
+            <div class="pill">
+                <span class="pill-dot"></span>
+                SDK FINIX 2026 — Tecnología de próxima generación
+            </div>
+            <h1>
+                El Futuro de la<br>
+                <span class="accent-line">Tecnología a tu Alcance.</span>
+            </h1>
+            <p>Expertos en soporte técnico garantizado y soluciones digitales a medida. Reparamos, desarrollamos y escalamos tu negocio al máximo nivel.</p>
+            <div class="hero-btns">
+                <a href="services/index.html" class="btn">Comenzar Ahora →</a>
+                <a href="zenix/index.html" class="btn btn-outline">🤖 Conocer Zenix IA</a>
+            </div>
         </div>
     </section>
 
-    <section class="section">
-        <h2 class="section-title">Destacados de SDK FINIX</h2>
-        <div class="grid">
-            <a href="repair-pc/index.html" class="card">
-                <h3>💻 Mantenimiento de Hardware</h3>
-                <p>Equipos siempre como nuevos. Resolvemos fallos en PCs, laptops e impresoras en un instante.</p>
-            </a>
-            <a href="repair-mobile/index.html" class="card">
-                <h3>📱 Soporte Móvil y Celulares</h3>
-                <p>No pierdas el contacto. Reparamos pantallas, baterías y módulos dañados rápidamente.</p>
-            </a>
-            <a href="dev-web/index.html" class="card">
-                <h3>🌐 Transformación Digital</h3>
-                <p>Diseño web corporativo, programas a medida y apps para que nunca dejes de vender y organizar.</p>
-            </a>
+    <!-- ===================== STATS ===================== -->
+    <div class="stats-wrap">
+        <div class="stats-strip">
+            <div class="stat-card reveal">
+                <div class="stat-num">500+</div>
+                <div class="stat-label">Equipos Reparados</div>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-num">99.9%</div>
+                <div class="stat-label">Tasa de Satisfacción</div>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-num">24/7</div>
+                <div class="stat-label">Soporte Disponible</div>
+            </div>
         </div>
-        <div style="text-align:center; margin-top:3rem;">
-            <a href="services/index.html" class="btn">Ver Catálogo de Servicios</a>
-        </div>
-    </section>
+    </div>
 
+    <!-- ===================== SERVICES ===================== -->
+    <div class="services-wrap">
+        <section class="section">
+            <div class="section-header reveal">
+                <h2>Servicios que <span class="accent">transforman</span> tu negocio.</h2>
+                <p>Todo el espectro de soluciones tecnológicas — desde reparaciones urgentes hasta software empresarial a medida.</p>
+            </div>
+
+            <div class="grid">
+                <a href="repair-laptop/index.html" class="card reveal">
+                    <div class="card-icon">💻</div>
+                    <h3>Mantenimiento Hardware</h3>
+                    <p>Equipos siempre como nuevos. Resolvemos fallos en PCs, laptops e impresoras con repuestos de alta gama y garantía total.</p>
+                </a>
+
+                <a href="repair-mobile/index.html" class="card reveal">
+                    <div class="card-icon">📱</div>
+                    <h3>Soporte Móvil</h3>
+                    <p>Reparamos pantallas, baterías y microsoldadura para iPhone, Samsung y Xiaomi de forma rápida y con garantía.</p>
+                </a>
+
+                <a href="dev-web/index.html" class="card reveal">
+                    <div class="card-icon">🌐</div>
+                    <h3>Transformación Digital</h3>
+                    <p>Diseño web corporativo, sistemas de gestión y aplicaciones a medida con las tecnologías más modernas de 2026.</p>
+                </a>
+
+                <a href="repair-pc/index.html" class="card reveal">
+                    <div class="card-icon">🖥️</div>
+                    <h3>PCs de Escritorio</h3>
+                    <p>Ensamblaje, diagnóstico y optimización para gaming o trabajo. Cambio de fuentes, placas, RAM y almacenamiento.</p>
+                </a>
+
+                <a href="repair-printer/index.html" class="card reveal">
+                    <div class="card-icon">🖨️</div>
+                    <h3>Impresoras</h3>
+                    <p>Reset de almohadillas, limpieza de cabezales, sistemas continuos y configuración de red para todos los modelos.</p>
+                </a>
+
+                <a href="dev-mobile/index.html" class="card reveal">
+                    <div class="card-icon">📲</div>
+                    <h3>Apps Móviles</h3>
+                    <p>Desarrollo Android e iOS. Lleva tu negocio a todas las plataformas con aplicaciones nativas y de alto rendimiento.</p>
+                </a>
+            </div>
+
+            <div class="cta-container reveal">
+                <a href="services/index.html" class="btn">Ver Catálogo Completo →</a>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===================== ZENIX FEATURE ===================== -->
+    <div class="features-section">
+        <div class="split-layout">
+            <div class="split-img-zenix reveal">
+                <img src="IMAGEN/SDK.png" alt="Zenix IA — Asistente Virtual SDK FINIX">
+            </div>
+            <div class="split-text reveal">
+                <h2>Conoce a <span class="accent">Zenix IA.</span></h2>
+                <p>Tu asistente virtual inteligente, disponible 24/7. Con más de 70 categorías de respuesta y acceso a IA avanzada para resolver cualquier consulta técnica al instante.</p>
+                <ul class="feature-list">
+                    <li>Respuestas instantáneas sobre servicios y precios</li>
+                    <li>Diagnóstico preliminar de problemas técnicos</li>
+                    <li>Integración con IA Groq para consultas avanzadas</li>
+                    <li>Disponible en todas las páginas del sitio</li>
+                </ul>
+                <a href="zenix/index.html" class="btn">Conocer a Zenix →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== CTA BANNER ===================== -->
+    <div class="cta-banner">
+        <div class="cta-banner-inner">
+            <div class="pill reveal">
+                <span class="pill-dot"></span>
+                Garantía en todos los servicios
+            </div>
+            <h2 class="reveal">¿Listo para llevar tu tecnología<br>al <span class="cta-accent-text">siguiente nivel?</span></h2>
+            <p class="reveal">Contáctanos hoy y recibe diagnóstico sin costo. Tu equipo en perfect estado o tu dinero de vuelta.</p>
+            <div class="cta-btns reveal">
+                <a href="contact/index.html" class="btn">Contactar Ahora →</a>
+                <a href="services/index.html" class="btn btn-outline">Ver Servicios</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== FOOTER ===================== -->
     <footer>
-        <p>&copy; 2026 SDK FINIX. Toda tu tecnología, una sola solución.</p>
+        <p>&copy; 2026 SDK FINIX · Ayacucho, Perú · Toda tu tecnología, una sola solución profesional.</p>
     </footer>
 
+    <!-- ===================== SCRIPTS ===================== -->
     <script src="main.js"></script>
     <script src="chatbot.js"></script>
+    <script>
+        // Header on scroll
+        window.addEventListener('scroll', () => {
+            document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Reveal on scroll
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    </script>
 </body>
 </html>

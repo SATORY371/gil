@@ -102,13 +102,33 @@ document.addEventListener('DOMContentLoaded', () => {
         "default": "🤖 Mmm, no estoy 100% segura... pero déjame consultar mi inteligencia avanzada."
     };
 
+    // ==================== DETECT PAGE & IMAGE PATH ====================
+    const isZenixPage = window.location.pathname.includes('/zenix');
+    const pathDepth = (window.location.pathname.match(/\//g) || []).length;
+    const imgPath = pathDepth <= 1 ? 'IMAGEN/SDK.png' : '../IMAGEN/SDK.png';
+
     // ==================== INYECTAR HTML DEL CHAT ====================
+    // On zenix page: chat button uses SDK.png image as icon
+    // On all other pages: Zenix avatar appears to the left of the chat button
+    const chatBtnContent = isZenixPage
+        ? `<img src="${imgPath}" alt="Zenix IA">`
+        : `💬`;
+
+    const zenixAvatarHTML = !isZenixPage
+        ? `<div id="zenix-side-avatar" title="Zenix IA — Asistente Virtual">
+                <img src="${imgPath}" alt="Zenix IA">
+           </div>`
+        : '';
+
     const chatHTML = `
         <div id="chatbot-container">
-            <button id="chat-btn">💬</button>
+            ${zenixAvatarHTML}
+            <button id="chat-btn" class="${isZenixPage ? 'chat-btn-zenix' : ''}" title="${isZenixPage ? 'Chatear con Zenix' : 'Abrir chat'}">
+                ${chatBtnContent}
+            </button>
             <div id="chat-window">
                 <div id="chat-header">
-                    <h3>Zenix - SDK FINIX</h3>
+                    <h3>✦ Zenix — SDK FINIX</h3>
                     <button id="chat-close">✖</button>
                 </div>
                 <div id="chat-body" class="chat-body">

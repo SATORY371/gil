@@ -1,96 +1,86 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Current page link highlighting
+
+    // ---- Active nav link highlighting ----
     const navLinks = document.querySelectorAll('nav ul li a');
-    const currentUrl = window.location.href;
-    
+    const currentPath = window.location.pathname;
+
     navLinks.forEach(link => {
-        if(currentUrl.includes(link.getAttribute('href')) && link.getAttribute('href') !== 'index.html') {
+        const href = link.getAttribute('href') || '';
+        link.classList.remove('active');
+        const clean = href.replace('../', '').replace('/index.html', '').replace('index.html', '');
+        if (
+            (currentPath.endsWith('/') && (href === 'index.html' || href === '../index.html')) ||
+            (clean && currentPath.includes(clean))
+        ) {
             link.classList.add('active');
-        } else if (currentUrl.endsWith('/') && link.getAttribute('href') === 'index.html') {
-             link.classList.add('active');
         }
     });
 
-    // --- Menú Hamburguesa Móvil ---
+    // ---- Mobile Hamburger Menu ----
     const header = document.querySelector('header');
-    const nav = document.querySelector('nav');
-    
-    if (header && nav) {
+    const nav    = document.querySelector('nav');
+
+    if (header && nav && !document.querySelector('.mobile-menu-btn')) {
         const menuBtn = document.createElement('button');
         menuBtn.className = 'mobile-menu-btn';
-        menuBtn.innerHTML = '☰';
-        header.appendChild(menuBtn);
+        menuBtn.setAttribute('aria-label', 'Abrir menu');
+        menuBtn.innerHTML = '&#9776;';
 
-        menuBtn.addEventListener('click', () => {
-            nav.classList.toggle('active');
-            menuBtn.innerHTML = nav.classList.contains('active') ? '✕' : '☰';
+        const navCta = header.querySelector('.nav-cta');
+        if (navCta) header.insertBefore(menuBtn, navCta);
+        else         header.appendChild(menuBtn);
+
+        const closeMenu = () => {
+            nav.classList.remove('active');
+            menuBtn.innerHTML = '&#9776;';
+            menuBtn.setAttribute('aria-label', 'Abrir menu');
+        };
+
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = nav.classList.toggle('active');
+            menuBtn.innerHTML = isOpen ? '&#10005;' : '&#9776;';
+            menuBtn.setAttribute('aria-label', isOpen ? 'Cerrar menu' : 'Abrir menu');
         });
 
-        // Cerrar al clickear un enlace
-        nav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                nav.classList.remove('active');
-                menuBtn.innerHTML = '☰';
-            });
+        nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+
+        document.addEventListener('click', (e) => {
+            if (nav.classList.contains('active') && !nav.contains(e.target) && !menuBtn.contains(e.target)) {
+                closeMenu();
+            }
         });
     }
 
-    // Smooth reveal animation
-    const observer = new IntersectionObserver((entries) => {
+    // ---- Header scroll effect ----
+    const headerEl = document.getElementById('header');
+    if (headerEl) {
+        const onScroll = () => headerEl.classList.toggle('scrolled', window.scrollY > 50);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
+
+    // ---- Scroll reveal animation ----
+    const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if(entry.isIntersecting) {
-                entry.target.style.opacity = 1;
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                entry.target.style.opacity = '1';
                 entry.target.style.transform = 'translateY(0)';
             }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 
-        document.querySelectorAll('.card, .section-title, .page-header, .content-block, form').forEach(el => {
-            el.style.opacity = 0;
+    document.querySelectorAll([
+        '.card', '.section-title', '.page-header', '.content-block',
+        'form', '.reveal', '.stat-card', '.zenix-card', '.personality-item',
+        '.timeline-item', '.phrase-card', '.use-item', '.zenix-stat'
+    ].join(',')).forEach(el => {
+        if (!el.classList.contains('reveal')) {
+            el.style.opacity = '0';
             el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
-
-    // --- Zenix Flotante Global (Solo Móvil) ---
-    function initGlobalZenix() {
-        if (window.innerWidth >= 1024) return;
-        
-        // Crear elemento si no existe
-        let floatingZenix = document.getElementById('zenix-floating-avatar');
-        if (!floatingZenix) {
-            floatingZenix = document.createElement('div');
-            floatingZenix.id = 'zenix-floating-avatar';
-            floatingZenix.innerHTML = '<img src="IMAGEN/SDK.png" alt="Zenix Floating">';
-            floatingZenix.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
-            document.body.appendChild(floatingZenix);
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         }
-
-        const handleScroll = () => {
-            const heroImage = document.querySelector('.zenix-img-wrapper img');
-            if (heroImage) {
-                // En la página de Zenix (zenix.html), sigue apareciendo al bajar
-                const rect = heroImage.getBoundingClientRect();
-                if (rect.bottom < 0) {
-                    floatingZenix.classList.add('visible');
-                } else {
-                    floatingZenix.classList.remove('visible');
-                }
-            } else {
-                // En TODAS las demás páginas, Zenix es permanente en móviles
-                floatingZenix.classList.add('visible');
-            }
-        };
-
-        if (!document.querySelector('.zenix-img-wrapper img')) {
-            // Si no estamos en zenix.html, la mostramos de una vez
-            floatingZenix.classList.add('visible');
-        } else {
-            // Si estamos en zenix.html, usamos el listener
-            window.addEventListener('scroll', handleScroll);
-            handleScroll();
-        }
-    }
-
-    initGlobalZenix();
+        revealObserver.observe(el);
+    });
 });
