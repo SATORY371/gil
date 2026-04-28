@@ -1,246 +1,307 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Cargar marked.js dinámicamente para parsear Markdown (tablas, negritas, etc)
+    const script = document.createElement('script');
+    script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+    document.head.appendChild(script);
 
-    // ==================== CONFIGURACIÓN GEMINI (ROTACIÓN) ====================
-   const WORKER_URL = "https://zenix-api.vegaquispeelvis.workers.dev"; // O la URL que te dio Cloudflare
-    let currentKeyIndex = 0;
+    const WORKER_URL = "https://zenix-api.vegaquispeelvis.workers.dev/"; 
 
-    // ==================== BASE DE CONOCIMIENTO (Respuestas largas) ====================
-    const botResponses = {
-        // --- CREADOR ---
-        "quien te creo": "¡Jajaja, buena pregunta! 🔥 Fui creado por un programador apasionado y un poco loco por la tecnología... ¿Quieres que te cuente más sobre cómo nací?",
-        "quien es tu creador": "Mi creador es un genio de la programación... ¿Y tú, en qué andas metido hoy?",
-        "creador": "¡Mi creador es un desarrollador de élite!... Dime, ¿qué te trae por aquí hoy?",
-        
-        "quien te hizo": "Me programó un desarrollador súper talentoso... ¿Quieres saber más o prefieres ayuda técnica?",
-        "de donde eres": "Soy de la nube, pero mi hogar es SDK FINIX 💻... ¿En qué te puedo echar una mano hoy?",
-        "quien eres": "¡Soy Zenix 🤖! El asistente virtual oficial de SDK FINIX... ¿Qué necesitas, netrunner?",
-
-        // --- SALUDOS ---
-        "hola": "¡Holaaa! 👋 ¡Qué gusto verte! Soy Zenix de SDK FINIX. ¿Cómo estás hoy? ¿Problema con algún equipo?",
-        "buenos dias": "¡Buenos días! 🌞 Estoy listo al 100%. ¿Qué necesitas hoy?",
-        "buenas tardes": "¡Buenas tardes! 🌤️ ¿Cómo va tu día? Dime en qué te ayudo.",
-        "buenas noches": "¡Buenas noches! 🌙 ¿Qué te trae por aquí? ¿Equipo urgente o solo charlar?",
-
-        // --- DESPEDIDAS ---
-        "gracias": "¡De nada! 😊 Si necesitas algo más, aquí estoy. ¿Quieres que te recuerde algo?",
-        "muchas gracias": "¡Un placer enorme! 🙏 ¿Quieres la ubicación o algo más?",
-        "adios": "¡Hasta la próxima, netrunner! 👋 Vuelve cuando quieras.",
-
-        // --- IMPRESORAS ---
-        "impresora no imprime": "🖨️ ¡Vamos a resolverlo! Suele ser tinta agotada, papel atascado, drivers o cabezal tapado. ¿Qué marca es tu impresora? ¿Parpadean luces? Cuéntame más y te guío.",
-        "error epson": "🖨️ Error de almohadillas en Epson se resuelve con reseteo. Lo hacemos en 15-20 minutos. ¿Qué modelo tienes?",
-        "impresora hace ruido": "🖨️ Probablemente papel atascado o rodillos desgastados. No la fuerces. ¿De qué marca es?",
-
-        // --- PC Y LAPTOP ---
-        "pc no prende": "💻 Revisa cable, enchufe y fuente. ¿Se enciende alguna luz? Cuéntame más detalles.",
-        "laptop no prende": "💻 ¿El LED de carga enciende? ¿De qué marca y modelo es? Te doy pasos precisos.",
-        "mi pc esta lenta": "🐌 La solución estrella es ponerle un SSD + más RAM. ¿Quieres que te explique el proceso?",
-        "laptop calienta": "🔥 Necesita limpieza de ventiladores y cambio de pasta térmica urgente. ¿Se apaga sola?",
-
-        // --- CELULARES ---
-        "celular no carga": "🔌 Prueba con otro cable. Si no carga, el pin interno puede estar dañado. ¿Qué marca y modelo?",
-        "celular se calienta": "🔥 Puede ser batería hinchada o app descontrolada. No lo cargues si está abultado. ¿Modelo?",
-
-        // --- PANTALLAS ---
-        "pantalla rota": "💥 Cambiamos pantallas con garantía. Dime el modelo exacto (ej: Samsung A54, iPhone 14) y te cotizo ya.",
-
-        // --- DEFAULT ---
-        "default": "🤖 ¡Ey, netrunner! No capté bien el mensaje. ¿Es sobre PC, laptop, celular, impresora, o quieres hablar de procesadores Intel Core Ultra? Dame más detalles."
-    };
-
-    // ==================== DETECT PAGE & IMAGE PATH ====================
-    const isZenixPage = window.location.pathname.includes('/zenix');
-    const pathDepth = (window.location.pathname.match(/\//g) || []).length;
-    const imgPath = pathDepth <= 1 ? 'IMAGEN/SDK.png' : '../IMAGEN/SDK.png';
-
-    // ==================== INYECTAR HTML DEL CHAT ====================
-    const chatBtnContent = isZenixPage
-        ? `<img src="${imgPath}" alt="Zenix IA">`
-        : `💬`;
-
-    const zenixAvatarHTML = !isZenixPage
-        ? `<div id="zenix-side-avatar" title="Zenix IA — Asistente Virtual">
-                <img src="${imgPath}" alt="Zenix IA">
-           </div>`
-        : '';
-
-    const chatHTML = `
-        <div id="chatbot-container">
-            ${zenixAvatarHTML}
-            <button id="chat-btn" class="${isZenixPage ? 'chat-btn-zenix' : ''}" title="${isZenixPage ? 'Chatear con Zenix' : 'Abrir chat'}">
-                ${chatBtnContent}
-            </button>
-            <div id="chat-window">
-                <div id="chat-header">
-                    <h3>✦ Zenix — SDK FINIX</h3>
-                    <button id="chat-close">✖</button>
-                </div>
-                <div id="chat-body" class="chat-body" style="background-image: url('${imgPath}'); background-size: contain; background-position: center; background-repeat: no-repeat; position: relative;">
-                    <div style="position: absolute; inset: 0; background: rgba(13,13,15,0.85); z-index: 0; pointer-events: none;"></div>
-                    <div style="position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
-                        <div class="msg bot">¡Ey, netrunner! ⚡ Soy <strong>Zenix</strong>, tu asistente de SDK FINIX. ¿En qué te ayudo hoy?</div>
-                        <div class="faq-buttons">
-                            <button class="faq-btn">Reparación PC</button>
-                            <button class="faq-btn">Desarrollo Web</button>
-                            <button class="faq-btn">Cambio Pantalla Celular</button>
-                            <button class="faq-btn">¿Cuánto cuesta?</button>
-                            <button class="faq-btn">Ubicación y Horario</button>
-                            <button class="faq-btn">Laptop no prende</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Escribe un mensaje..." />
-                    <button id="chat-send">▶</button>
-                </div>
-            </div>
-        </div>
-    `;
-    // Detectar si estamos en la app a pantalla completa
-    const isZenixAppPage = path.includes('/agente-zenix');
-
-    // Si NO estamos en la página de Zenix App completa, inyectamos el flotante
-    if (!isZenixAppPage) {
-        document.body.insertAdjacentHTML('beforeend', chatHTML);
-    }
-
-    // Elementos del DOM (buscamos en el documento si ya existen)
-    const chatBtn = document.getElementById('chat-btn');
-    const chatWindow = document.getElementById('chat-window');
-    const chatClose = document.getElementById('chat-close');
+    const chatBody = document.getElementById('chat-body');
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
-    const chatBody = document.getElementById('chat-body');
+    const chatBtn = document.getElementById('chat-btn');
+    const chatWindow = document.getElementById('chat-window');
+    const chatHeader = document.getElementById('chat-header');
+    const chatInputArea = document.getElementById('chat-input-area');
+    const chatClose = document.getElementById('chat-close');
 
-    if (chatBtn && chatWindow) {
-        chatBtn.addEventListener('click', () => {
-            chatWindow.classList.toggle('active');
-            if (chatWindow.classList.contains('active')) chatInput.focus();
-        });
-    }
+    // 2. Inyectar botones de Voz y Borrar en el UI dinámicamente
+    if (chatHeader) {
+        // Contenedor para los controles extra en el header
+        const headerControls = document.createElement('div');
+        headerControls.style.display = 'flex';
+        headerControls.style.gap = '5px';
+        headerControls.style.marginRight = '10px';
+        headerControls.style.marginLeft = 'auto';
+        headerControls.style.alignItems = 'center';
 
-    if (chatClose) {
-        chatClose.addEventListener('click', () => chatWindow.classList.remove('active'));
-    }
+        // Botón Altavoz
+        const btnSpeaker = document.createElement('button');
+        btnSpeaker.innerHTML = '🔈';
+        btnSpeaker.title = "Activar voz de Zenix";
+        btnSpeaker.style.background = 'transparent';
+        btnSpeaker.style.border = 'none';
+        btnSpeaker.style.cursor = 'pointer';
+        btnSpeaker.style.fontSize = '1.2rem';
+        headerControls.appendChild(btnSpeaker);
 
-    document.querySelectorAll('.faq-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            chatInput.value = btn.innerText;
-            sendMessage();
-        });
-    });
+        // Botón Borrar Chat
+        const btnClear = document.createElement('button');
+        btnClear.innerHTML = '🗑️';
+        btnClear.title = "Borrar chat";
+        btnClear.style.background = 'transparent';
+        btnClear.style.border = 'none';
+        btnClear.style.cursor = 'pointer';
+        btnClear.style.fontSize = '1.2rem';
+        headerControls.appendChild(btnClear);
 
-    // ==================== FUNCIÓN HORA ====================
-    function getTimeInCountry(country) {
-        const timeZones = {
-            "peru": "America/Lima", "perú": "America/Lima",
-            "méxico": "America/Mexico_City", "mexico": "America/Mexico_City",
-            "españa": "Europe/Madrid", "espana": "Europe/Madrid"
-            // Puedes agregar más países aquí
+        // Insertar antes del botón de cerrar
+        chatHeader.insertBefore(headerControls, chatClose);
+
+        // Lógica de Voz (Text-to-Speech)
+        let isSpeakerEnabled = false;
+        btnSpeaker.onclick = () => {
+            isSpeakerEnabled = !isSpeakerEnabled;
+            btnSpeaker.innerText = isSpeakerEnabled ? "🔊" : "🔈";
         };
 
-        const zone = timeZones[country.toLowerCase()] || "America/Lima";
-        const options = { timeZone: zone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-        const now = new Date();
-        const hora = now.toLocaleTimeString('es-PE', options);
-        const ciudad = country.charAt(0).toUpperCase() + country.slice(1);
-        return `🕒 La hora exacta en **${ciudad}** es: **${hora}**`;
+        // Exportar variable para uso en sendMessage
+        window.zenixSpeakerEnabled = () => isSpeakerEnabled;
+
+        // Lógica Borrar Historial
+        btnClear.onclick = () => {
+            if(confirm("¿Seguro que deseas borrar el chat?")) {
+                chatBody.innerHTML = '';
+                addSuggestions();
+            }
+        };
     }
 
-    // ==================== BUSCAR RESPUESTA LOCAL ====================
-    function getLocalResponse(msg) {
-        const txt = msg.toLowerCase().trim();
+    if (chatInputArea) {
+        // Botón Micrófono
+        const btnMic = document.createElement('button');
+        btnMic.innerHTML = '🎙️';
+        btnMic.title = "Dictar por voz";
+        btnMic.style.background = 'transparent';
+        btnMic.style.border = 'none';
+        btnMic.style.cursor = 'pointer';
+        btnMic.style.fontSize = '1.2rem';
+        btnMic.style.padding = '0 10px';
+        
+        chatInputArea.insertBefore(btnMic, chatInput);
 
-        if (txt.includes("hora") || txt.includes("qué hora") || txt.includes("hora en")) {
-            if (txt.includes("hora en")) {
-                const pais = txt.split("hora en")[1].trim().replace(/[?¿]/g, "").trim();
-                if (pais) return getTimeInCountry(pais);
-            }
-            return getTimeInCountry("peru");
-        }
-
-        const keys = Object.keys(botResponses).filter(k => k !== 'default');
-        keys.sort((a, b) => b.length - a.length);
-
-        for (const key of keys) {
-            if (txt.includes(key)) {
-                return botResponses[key];
-            }
-        }
-        return null;
-    }
-
-    // ==================== ENVIAR MENSAJE ====================
-    async function sendMessage() {
-        const rawText = chatInput.value.trim();
-        if (!rawText) return;
-
-        addMessage(rawText, 'user');
-        chatInput.value = '';
-
-        const typingEl = showTyping();
-
-        const localReply = getLocalResponse(rawText);
-
-        if (localReply) {
-            typingEl.remove();
-            addMessage(localReply, 'bot');
+        // Lógica Micrófono (Voice-to-Text)
+        let recognition;
+        let isRecording = false;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'es-ES';
+            recognition.onstart = () => { 
+                isRecording = true; 
+                btnMic.style.color = "red"; 
+                chatInput.placeholder = "Escuchando...";
+            };
+            recognition.onresult = (e) => { 
+                chatInput.value = e.results[0][0].transcript; 
+                sendMessage(); 
+            };
+            recognition.onend = () => { 
+                isRecording = false; 
+                btnMic.style.color = ""; 
+                chatInput.placeholder = "Escribe tu consulta...";
+            };
+            btnMic.onclick = () => { isRecording ? recognition.stop() : recognition.start(); };
         } else {
-            // === LLAMADA AL WORKER SEGURO (Proxy de IA) ===
-            const WORKER_URL = "https://zenix-api.vegaquispeelvis.workers.dev"; // Asegúrate de que esta sea tu URL de Cloudflare
+            btnMic.style.display = 'none';
+        }
+    }
 
-            try {
-                const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: rawText,
-                        provider: "grok" // Cambia a "gemini" si prefieres usar la otra API
-                    })
-                });
+    const faqs = [
+        "¿Qué servicios ofrece SDK FINIX? 🚀",
+        "¿Eres experto en C# y SQL? 💻",
+        "¿Cómo contacto con soporte técnico? 🛠️"
+    ];
 
-                if (response.ok) {
-                    const data = await response.json();
-                    let aiReply = data.reply || "No pude procesar una respuesta.";
-
-                    // Formateo de texto: saltos de línea y negritas
-                    aiReply = aiReply.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                    
-                    typingEl.remove();
-                    addMessage(aiReply, 'bot');
-                } else {
-                    throw new Error("Error en la respuesta del Worker");
-                }
-            } catch (error) {
-                console.error("Error de conexión con Zenix:", error);
-                typingEl.remove();
-                addMessage("¡Ups! Mi enlace neuronal está fallando. Inténtalo de nuevo, netrunner. ⚡", 'bot');
+    if (chatBtn) {
+        chatBtn.addEventListener('click', () => {
+            chatWindow.classList.toggle('active');
+            if (chatWindow.classList.contains('active')) {
+                chatInput.focus();
+                if (chatBody.innerHTML.trim() === "") addSuggestions();
             }
+        });
+    }
+
+    if (chatClose) chatClose.addEventListener('click', () => chatWindow.classList.remove('active'));
+
+    function addSuggestions() {
+        const container = document.createElement('div');
+        container.className = 'suggestion-container';
+        container.style.cssText = "display:flex; flex-wrap:wrap; gap:8px; padding:10px;";
+
+        faqs.forEach(q => {
+            const btn = document.createElement('button');
+            btn.innerText = q;
+            btn.style.cssText = "background:#00f2ff22; border:1px solid #00f2ff; color:#00f2ff; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:0.8em;";
+            btn.onclick = () => {
+                sendMessage(q);
+                container.remove();
+            };
+            container.appendChild(btn);
+        });
+        chatBody.appendChild(container);
+    }
+
+    async function sendMessage(overrideText = null) {
+        const text = overrideText || chatInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        chatInput.value = '';
+        
+        const oldSuggestions = chatBody.querySelector('.suggestion-container');
+        if (oldSuggestions) oldSuggestions.remove();
+
+        const typing = showTyping();
+
+        try {
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+            if (typing) typing.remove();
+
+            let rawReply = data.reply || "Error de red.";
+            addMessage(rawReply, 'bot');
+
+            // Leer respuesta en voz alta si está habilitado
+            if (window.zenixSpeakerEnabled && window.zenixSpeakerEnabled()) {
+                const cleanText = rawReply.replace(/[*#`_]/g, ''); // Limpiar markdown para hablar
+                const u = new SpeechSynthesisUtterance(cleanText);
+                u.lang = 'es-ES';
+                window.speechSynthesis.speak(u);
+            }
+
+        } catch (error) {
+            if (typing) typing.remove();
+            addMessage("Error de conexión neuronal.", 'bot');
         }
     }
 
     function addMessage(text, sender) {
         const div = document.createElement('div');
         div.className = `msg ${sender}`;
-        div.innerHTML = text;
-        const contentContainer = chatBody.querySelector('div[style*="position: relative"]') || chatBody;
-        contentContainer.appendChild(div);
+        
+        if (sender === 'bot' && typeof marked !== 'undefined') {
+            const fixedText = fixIncompleteTables(text);
+            div.innerHTML = marked.parse(fixedText);
+            enhanceTables(div);
+        } else if (sender === 'bot') {
+            // Fallback si marked no cargó aún
+            div.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        } else {
+            div.innerText = text;
+        }
+
+        chatBody.appendChild(div);
         chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function fixIncompleteTables(text) {
+        const lines = text.split('\n');
+        let inTable = false;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line.startsWith('|')) {
+                if (!inTable) {
+                    inTable = true;
+                    // Check if next line is a separator
+                    if (i + 1 >= lines.length || !lines[i + 1].trim().match(/^\|?[\s\-:]+\|/)) {
+                        const pipes = (line.match(/\|/g) || []).length;
+                        const cols = Math.max(1, pipes);
+                        let sep = '|' + '---|'.repeat(cols);
+                        lines.splice(i + 1, 0, sep);
+                    }
+                }
+            } else {
+                inTable = false;
+            }
+        }
+        return lines.join('\n');
     }
 
     function showTyping() {
         const div = document.createElement('div');
-        div.className = 'msg bot';
-        div.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
-        const contentContainer = chatBody.querySelector('div[style*="position: relative"]') || chatBody;
-        contentContainer.appendChild(div);
+        div.className = 'msg bot typing';
+        div.innerHTML = 'Zenix pensando... ⚡';
+        chatBody.appendChild(div);
         chatBody.scrollTop = chatBody.scrollHeight;
         return div;
     }
 
-    // ==================== EVENTOS ====================
-    chatSend.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
+    function enhanceTables(container) {
+        const tables = container.querySelectorAll('table');
+        tables.forEach(table => {
+            // Aplicar estilos locales a la tabla para que se vea bien
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.marginTop = '10px';
+            table.style.marginBottom = '10px';
+            table.style.fontSize = '0.9em';
+            table.style.color = '#fff';
+            
+            table.querySelectorAll('th, td').forEach(cell => {
+                cell.style.border = '1px solid rgba(34, 211, 238, 0.3)';
+                cell.style.padding = '8px';
+                cell.style.textAlign = 'left';
+            });
+            table.querySelectorAll('th').forEach(th => {
+                th.style.background = 'rgba(34, 211, 238, 0.15)';
+                th.style.color = 'var(--cyan, #22d3ee)';
+            });
+
+            // Envolver en un div exportable
+            const wrapper = document.createElement('div');
+            wrapper.className = 'zenix-table-container';
+            wrapper.style.position = 'relative';
+            wrapper.style.overflowX = 'auto';
+            wrapper.style.marginBottom = '15px';
+            wrapper.style.border = '1px solid rgba(34, 211, 238, 0.2)';
+            wrapper.style.borderRadius = '8px';
+            wrapper.style.padding = '10px';
+            wrapper.style.background = 'rgba(0,0,0,0.3)';
+            
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+
+            // Botón de exportación a CSV
+            const btnExport = document.createElement('button');
+            btnExport.innerHTML = '📥 Exportar a CSV (Excel)';
+            btnExport.title = "Descargar tabla en formato CSV";
+            btnExport.style.cssText = "display:block; margin-top:10px; background:var(--grad-main, linear-gradient(90deg, #22d3ee, #a855f7)); color:#000; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; font-weight:bold; font-size:0.85rem; width:100%; transition: transform 0.2s;";
+            btnExport.onmouseover = () => btnExport.style.transform = 'scale(1.02)';
+            btnExport.onmouseout = () => btnExport.style.transform = 'scale(1)';
+            btnExport.onclick = () => exportTableToCSV(table);
+            wrapper.appendChild(btnExport);
+        });
+    }
+
+    function exportTableToCSV(table) {
+        let csv = [];
+        const rows = table.querySelectorAll("tr");
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            for (let j = 0; j < cols.length; j++) {
+                // Escapar comillas dobles y envolver texto en comillas
+                let data = cols[j].innerText.replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(","));
+        }
+        const csvFile = new Blob(["\uFEFF" + csv.join("\n")], { type: "text/csv;charset=utf-8;" }); // uFEFF para soportar tildes en Excel
+        const downloadLink = document.createElement("a");
+        downloadLink.download = "datos_zenix.csv";
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    if(chatSend) chatSend.addEventListener('click', () => sendMessage());
+    if(chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 });

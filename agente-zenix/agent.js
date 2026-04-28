@@ -1,14 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ==================== CONFIGURACIÓN GEMINI (ROTACIÓN) ====================
-   const WORKER_URL = "https://api.satory.nl/zenix"; // Usa tu dominio de Cloudflare
+    // 1. Cargar marked.js dinámicamente
+    const script = document.createElement('script');
+    script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+    document.head.appendChild(script);
+
+    // ==================== CONFIGURACIÓN ====================
+    const WORKER_URL = "https://zenix-api.vegaquispeelvis.workers.dev"; 
 
     // ==================== LOCAL STORAGE ====================
     const STORAGE_KEY = 'zenix_chats';
     let chats = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     let currentChatId = null;
 
-    // ==================== ELEMENTOS ====================
+    // ==================== ELEMENTOS DOM ====================
     const chatBody = document.getElementById('chat-body');
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
@@ -16,328 +21,267 @@ document.addEventListener('DOMContentLoaded', () => {
     const newChatBtn = document.getElementById('new-chat-btn');
     const btnSpeaker = document.getElementById('btn-speaker');
     const btnMic = document.getElementById('btn-mic');
+    
+    // Botón Borrar Historial (inyectado dinámicamente debajo del nuevo chat)
+    const btnClearHistory = document.createElement('button');
+    btnClearHistory.innerHTML = '🗑️ Borrar Historial';
+    btnClearHistory.className = 'new-chat-btn';
+    btnClearHistory.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+    btnClearHistory.style.color = '#ef4444';
+    btnClearHistory.style.marginTop = '10px';
+    
+    if (newChatBtn && newChatBtn.parentNode) {
+        newChatBtn.parentNode.insertBefore(btnClearHistory, newChatBtn.nextSibling);
+    }
+    
+    btnClearHistory.onclick = () => {
+        if(confirm("¿Estás seguro de que quieres borrar todos tus chats?")) {
+            chats = [];
+            currentChatId = null;
+            save();
+            createNewChat();
+        }
+    };
 
-    // ==================== ESTADO DE VOZ ====================
+    // ==================== VOZ (DICTADO Y AUDIO) ====================
     let isSpeakerEnabled = false;
     let recognition;
     let isRecording = false;
 
-    // Inicializar Speech Recognition si está soportado
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        recognition.lang = 'es-ES'; // O es-MX según preferencia
-        recognition.interimResults = false; // Solo resultados finales
-        recognition.continuous = false; // Se detiene al terminar la frase corta
-
-        recognition.onstart = () => {
-            isRecording = true;
-            btnMic.classList.add('recording');
+        recognition.lang = 'es-ES';
+        recognition.onstart = () => { 
+            isRecording = true; 
+            if(btnMic) btnMic.classList.add('recording'); 
+            chatInput.placeholder = "Escuchando...";
         };
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            chatInput.value = transcript;
-            // Opcional: auto-enviar mensaje tras dictar con un pequeño delay
-            setTimeout(() => sendMessage(), 500);
+        recognition.onresult = (e) => { 
+            chatInput.value = e.results[0][0].transcript; 
+            sendMessage(); 
         };
-
-        recognition.onerror = (event) => {
-            console.error("Error en micrófono:", event.error);
-            isRecording = false;
-            btnMic.classList.remove('recording');
+        recognition.onend = () => { 
+            isRecording = false; 
+            if(btnMic) btnMic.classList.remove('recording'); 
+            chatInput.placeholder = "Escribe tu mensaje o usa el micrófono...";
         };
-
-        recognition.onend = () => {
-            isRecording = false;
-            btnMic.classList.remove('recording');
-        };
-    } else {
-        console.warn("Speech Recognition no está soportado en este navegador.");
-        if (btnMic) btnMic.style.display = 'none';
     }
 
-    // Función para reproducir texto
-    function speakText(text) {
-        if (!isSpeakerEnabled || !('speechSynthesis' in window)) return;
-        
-        // Cortamos caracteres raros y formato markdown para que suene natural
-        const cleanText = text.replace(/[*_#`~]+/g, '').replace(/---/g, '');
-        
-        // Dividir oraciones simplemente por punto y seguido o saltos de línea para mejor compatibilidad
-        const chunks = cleanText.split(/[\n.]+/);
-
-        const voices = speechSynthesis.getVoices();
-        let selectedVoice = voices.find(voice => voice.lang.startsWith('es') && (voice.name.includes('Female') || voice.name.includes('Mujer') || voice.name.includes('Google español') || voice.name.includes('Sabina')));
-        if (!selectedVoice) {
-            selectedVoice = voices.find(voice => voice.lang.startsWith('es'));
-        }
-
-        chunks.forEach(chunk => {
-            const textToSpeak = chunk.trim();
-            if (textToSpeak.length > 0) {
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.lang = 'es-MX';
-                if (selectedVoice) utterance.voice = selectedVoice;
-                speechSynthesis.speak(utterance);
-            }
-        });
-    }
-
-    // ==================== FUNCIONES LOCAL STORAGE ====================
-    function saveChats() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
-    }
-
+    // ==================== LÓGICA DE HISTORIAL ====================
     function createNewChat() {
-        const newChat = {
-            id: Date.now().toString(),
-            title: "Nuevo Chat...",
-            messages: []
-        };
-        chats.unshift(newChat); // Agregar al inicio
-        saveChats();
-        currentChatId = newChat.id;
+        const id = Date.now();
+        chats.unshift({ id, title: 'Consulta Nueva', messages: [] });
+        currentChatId = id;
+        save();
         renderHistory();
         renderActiveChat();
     }
 
-    // ==================== RENDERIZADO ====================
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(chats)); }
+
     function renderHistory() {
+        if (!historyList) return;
         historyList.innerHTML = '';
-        chats.forEach((chat, index) => {
-            const div = document.createElement('div');
-            div.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`;
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.style.alignItems = 'center';
-
-            const titleSpan = document.createElement('span');
-            titleSpan.innerText = chat.title;
-            titleSpan.style.whiteSpace = 'nowrap';
-            titleSpan.style.overflow = 'hidden';
-            titleSpan.style.textOverflow = 'ellipsis';
-            titleSpan.style.flex = '1';
-
-            const delBtn = document.createElement('span');
-            delBtn.innerText = '✖';
-            delBtn.title = 'Borrar chat completo';
-            delBtn.style.cursor = 'pointer';
-            delBtn.style.marginLeft = '10px';
-            delBtn.style.padding = '0 5px';
-            delBtn.style.color = '#ef4444';
-            delBtn.style.fontWeight = 'bold';
-
-            delBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Evitar que se seleccione el chat al borrarlo
-                chats.splice(index, 1);
-                saveChats();
-                
-                // Si borramos el chat que estábamos viendo, saltar a otro o vaciar la vista
-                if (currentChatId === chat.id) {
-                    currentChatId = chats.length > 0 ? chats[0].id : null;
-                }
-                
-                renderHistory();
-                renderActiveChat();
-            });
-
-            div.appendChild(titleSpan);
-            div.appendChild(delBtn);
-
-            div.addEventListener('click', () => {
-                currentChatId = chat.id;
-                renderHistory();
-                renderActiveChat();
-            });
-            historyList.appendChild(div);
+        chats.forEach(c => {
+            const li = document.createElement('li');
+            li.className = 'chat-item ' + (c.id === currentChatId ? 'active' : '');
+            li.innerHTML = `<span>💬 ${c.title}</span>`;
+            li.onclick = () => { 
+                currentChatId = c.id; 
+                renderHistory(); 
+                renderActiveChat(); 
+            };
+            historyList.appendChild(li);
         });
     }
-
-    function formatText(text) {
-        return text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    }
-
-
 
     function renderActiveChat() {
-        // Limpiar el chat actual
+        if (!chatBody) return;
         chatBody.innerHTML = '';
+        const act = chats.find(c => c.id === currentChatId);
+        if (act) act.messages.forEach(m => addMsgUI(m.text, m.sender));
+    }
+
+    function addMsgUI(text, sender) {
+        const div = document.createElement('div');
+        div.className = `msg ${sender}`;
         
-        const actChat = chats.find(c => c.id === currentChatId);
-        if (!actChat || actChat.messages.length === 0) {
-            // Pantalla vacía o bienvenida
-            const div = document.createElement('div');
-            div.className = 'msg bot';
-            div.innerHTML = "¡Ey, netrunner! ⚡ Has entrado a mi Ciber-Núcleo. Inicia nuestra conversación aquí mismo. ¿En qué trabajamos hoy?";
-            chatBody.appendChild(div);
-            bindFaqButtons();
-            return;
+        if (sender === 'bot' && typeof marked !== 'undefined') {
+            const fixedText = fixIncompleteTables(text);
+            div.innerHTML = marked.parse(fixedText);
+            enhanceTables(div);
+        } else if (sender === 'bot') {
+            div.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        } else {
+            div.innerText = text;
         }
 
-        // Renderizar todos los mensajes
-        actChat.messages.forEach((msg, index) => {
-            const div = document.createElement('div');
-            div.className = `msg ${msg.sender}`;
-            
-            if (msg.sender === 'bot') {
-                div.innerHTML = `
-                    <div class="msg-content">${formatText(msg.text)}</div>
-                    <div class="msg-controls">
-                        <button class="msg-btn play-btn" title="Reproducir audio">▶️ Audio</button>
-                    </div>
-                `;
-                
-                // Botón Play manual
-                div.querySelector('.play-btn').addEventListener('click', () => {
-                    const temp = isSpeakerEnabled;
-                    isSpeakerEnabled = true; // forzar encendido momentáneo
-                    speakText(msg.text);
-                    isSpeakerEnabled = temp; // restaurar
-                });
-            } else {
-                div.innerHTML = formatText(msg.text);
-            }
-
-            chatBody.appendChild(div);
-        });
-
-        bindFaqButtons();
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
-
-    function bindFaqButtons() {
-        const faqBtns = chatBody.querySelectorAll('.faq-btn');
-        faqBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                chatInput.value = e.target.innerText;
-                sendMessage();
-            });
-        });
-    }
-
-    function clearTyping() {
-        const t = chatBody.querySelector('.typing-indicator')?.parentElement;
-        if (t) t.remove();
-    }
-
-    function addTyping() {
-        const div = document.createElement('div');
-        div.className = 'msg bot';
-        div.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
         chatBody.appendChild(div);
         chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    // ==================== LÓGICA DE API (CONMEMORIA Y ROTACIÓN) ====================
-    // ==================== LÓGICA DE API SEGURA (WORKER) ====================
+    function fixIncompleteTables(text) {
+        const lines = text.split('\n');
+        let inTable = false;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line.startsWith('|')) {
+                if (!inTable) {
+                    inTable = true;
+                    if (i + 1 >= lines.length || !lines[i + 1].trim().match(/^\|?[\s\-:]+\|/)) {
+                        const pipes = (line.match(/\|/g) || []).length;
+                        const cols = Math.max(1, pipes);
+                        let sep = '|' + '---|'.repeat(cols);
+                        lines.splice(i + 1, 0, sep);
+                    }
+                }
+            } else {
+                inTable = false;
+            }
+        }
+        return lines.join('\n');
+    }
+
+    function enhanceTables(container) {
+        const tables = container.querySelectorAll('table');
+        tables.forEach(table => {
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.marginTop = '10px';
+            table.style.marginBottom = '10px';
+            table.style.fontSize = '0.95em';
+            
+            table.querySelectorAll('th, td').forEach(cell => {
+                cell.style.border = '1px solid rgba(34, 211, 238, 0.3)';
+                cell.style.padding = '10px';
+            });
+            table.querySelectorAll('th').forEach(th => {
+                th.style.background = 'rgba(34, 211, 238, 0.15)';
+                th.style.color = 'var(--cyan, #22d3ee)';
+            });
+
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.style.overflowX = 'auto';
+            wrapper.style.marginBottom = '15px';
+            wrapper.style.border = '1px solid rgba(34, 211, 238, 0.2)';
+            wrapper.style.borderRadius = '8px';
+            wrapper.style.padding = '15px';
+            wrapper.style.background = 'rgba(0,0,0,0.3)';
+            
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+
+            const btnExport = document.createElement('button');
+            btnExport.innerHTML = '📥 Exportar a CSV (Excel)';
+            btnExport.title = "Descargar tabla en formato CSV";
+            btnExport.style.cssText = "display:inline-block; margin-top:10px; background:var(--grad-main, linear-gradient(90deg, #22d3ee, #a855f7)); color:#000; border:none; padding:8px 16px; border-radius:5px; cursor:pointer; font-weight:bold; font-size:0.9rem; transition: transform 0.2s;";
+            btnExport.onmouseover = () => btnExport.style.transform = 'scale(1.05)';
+            btnExport.onmouseout = () => btnExport.style.transform = 'scale(1)';
+            btnExport.onclick = () => exportTableToCSV(table);
+            wrapper.appendChild(btnExport);
+        });
+    }
+
+    function exportTableToCSV(table) {
+        let csv = [];
+        const rows = table.querySelectorAll("tr");
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            for (let j = 0; j < cols.length; j++) {
+                let data = cols[j].innerText.replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(","));
+        }
+        const csvFile = new Blob(["\uFEFF" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const downloadLink = document.createElement("a");
+        downloadLink.download = "datos_zenix_cibernucleo.csv";
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    // ==================== ENVÍO AL WORKER ====================
     async function sendMessage() {
-        const rawText = chatInput.value.trim();
-        if (!rawText) return;
+        const text = chatInput.value.trim();
+        if (!text) return;
         chatInput.value = '';
 
-        // Detener micrófono si estaba escuchando
-        if (isRecording && recognition) recognition.stop();
-
-        // Si no hay chat seleccionado, crea uno nuevo
-        if (!currentChatId || chats.length === 0) {
-            createNewChat();
-        }
-
-        const actChat = chats.find(c => c.id === currentChatId);
-
-        // Actualizar el título del chat si es el primer mensaje
-        if (actChat.messages.length === 0) {
-            actChat.title = rawText.length > 25 ? rawText.substring(0, 25) + '...' : rawText;
+        if (!currentChatId) createNewChat();
+        const act = chats.find(c => c.id === currentChatId);
+        
+        if (act.messages.length === 0) {
+            act.title = text.substring(0, 25);
             renderHistory();
         }
 
-        // Añadir el mensaje del usuario al historial local
-        actChat.messages.push({ sender: 'user', text: rawText });
-        saveChats();
+        act.messages.push({ sender: 'user', text });
         renderActiveChat();
-        addTyping();
+        save();
 
-        // --- LLAMADA AL WORKER SEGURO ---
-        const WORKER_URL = "https://api.satory.nl/zenix"; 
+        const typing = document.createElement('div');
+        typing.className = 'msg bot';
+        typing.innerText = 'Zenix está procesando...';
+        chatBody.appendChild(typing);
+        chatBody.scrollTop = chatBody.scrollHeight;
 
         try {
-            const response = await fetch(WORKER_URL, {
+            const res = await fetch(WORKER_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    message: rawText,
-                    context: actChat.messages.slice(-5) // Opcional: envía los últimos 5 mensajes para dar memoria a la IA
-                })
+                body: JSON.stringify({ message: text })
             });
+            const data = await res.json();
+            typing.remove();
 
-            clearTyping();
-
-            if (response.ok) {
-                const data = await response.json();
-                const aiReply = data.reply;
-
-                // Guardar respuesta del bot
-                actChat.messages.push({ sender: 'bot', text: aiReply });
-                saveChats();
-                renderActiveChat(); 
-                speakText(aiReply); // Función de voz de agent.js
+            if (res.ok) {
+                const botReply = data.reply || "Respuesta vacía.";
+                act.messages.push({ sender: 'bot', text: botReply });
+                renderActiveChat();
+                save();
+                if (isSpeakerEnabled) speak(botReply);
             } else {
-                throw new Error("Error en la respuesta del Worker");
+                const errorMsg = data.reply || "Error: El Worker respondió con un error técnico.";
+                addMsgUI(errorMsg, 'bot');
             }
-        } catch (error) {
-            console.error("Fallo de conexión con Zenix:", error);
-            clearTyping();
-            const errorMsg = "¡Ups! Mi enlace neuronal está fallando. Inténtalo de nuevo, netrunner. ⚡";
-            
-            actChat.messages.push({ sender: 'bot', text: errorMsg });
-            saveChats();
-            renderActiveChat();
-            speakText(errorMsg);
+        } catch (e) {
+            if (typing) typing.remove();
+            console.error("Connection Error:", e);
+            addMsgUI("Error de conexión neuronal con el Ciber-Núcleo.", 'bot');
         }
     }
 
-    // ==================== EVENTOS ====================
-    chatSend.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
+    function speak(t) {
+        // Limpiar markdown antes de hablar
+        const cleanText = t.replace(/[*#`_]/g, '');
+        const u = new SpeechSynthesisUtterance(cleanText);
+        u.lang = 'es-ES';
+        window.speechSynthesis.speak(u);
+    }
 
-    newChatBtn.addEventListener('click', createNewChat);
-
-    btnMic.addEventListener('click', () => {
-        if (!recognition) return alert("Tu navegador no soporta dictado por voz (prueba en Chrome o Edge).");
-        if (isRecording) {
-            recognition.stop();
-        } else {
-            recognition.start();
-        }
-    });
-
-    btnSpeaker.addEventListener('click', () => {
+    // ==================== EVENTOS FINAL ====================
+    if(chatSend) chatSend.addEventListener('click', sendMessage);
+    if(chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    if(newChatBtn) newChatBtn.addEventListener('click', createNewChat);
+    if(btnMic) btnMic.addEventListener('click', () => { if (recognition) isRecording ? recognition.stop() : recognition.start(); });
+    if(btnSpeaker) btnSpeaker.addEventListener('click', () => {
         isSpeakerEnabled = !isSpeakerEnabled;
-        if (isSpeakerEnabled) {
-            btnSpeaker.style.borderColor = "var(--cyan)";
-            btnSpeaker.style.color = "var(--cyan)";
-            btnSpeaker.innerText = "🔊"; // Altavoz encendido
-            
-            // Cargar las voces por adelantado en algunos navegadores
-            speechSynthesis.getVoices(); 
-        } else {
-            btnSpeaker.style.borderColor = "var(--border)";
-            btnSpeaker.style.color = "#fff";
-            btnSpeaker.innerText = "🔈"; // Altavoz apagado
-            speechSynthesis.cancel(); // Detener cualquier audios si se apaga en medio
-        }
+        btnSpeaker.innerText = isSpeakerEnabled ? "🔊" : "🔈";
+        btnSpeaker.style.color = isSpeakerEnabled ? "var(--cyan)" : "#fff";
     });
 
-    // ==================== INICIO ====================
-    if (chats.length > 0) {
-        currentChatId = chats[0].id;
-    } else {
-        createNewChat();
-    }
-    renderHistory();
-    renderActiveChat();
-
+    // Iniciar con un chat nuevo o cargar el historial
+    setTimeout(() => {
+        if (chats.length > 0) {
+            currentChatId = chats[0].id;
+            renderHistory();
+            renderActiveChat();
+        } else {
+            createNewChat();
+        }
+    }, 100);
 });

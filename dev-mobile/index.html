@@ -72,5 +72,28 @@
 
     <script src="../main.js"></script>
     <script src="../chatbot.js"></script>
+
+    <!-- ===================== CHATBOT FLOTANTE ===================== -->
+    <div id="chatbot-container">
+        <div id="zenix-side-avatar" title="Hablar con Zenix IA">
+            <img src="../IMAGEN/SDK.png" alt="Zenix IA - Asistente Virtual SDK FINIX">
+        </div>
+        <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
+            <div id="chat-window">
+                <div id="chat-header">
+                    <h3>⚡ Zenix IA</h3>
+                    <button id="chat-close" title="Cerrar">✕</button>
+                </div>
+                <div id="chat-body" class="chat-body">
+                    <div class="msg bot">¡Hola! Soy <strong>Zenix</strong> ⚡, la IA oficial de SDK FINIX. Estoy aquí para ayudarte con cualquier consulta sobre nuestros servicios. ¿En qué puedo ayudarte hoy?</div>
+                </div>
+                <div id="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Escribe tu consulta...">
+                    <button id="chat-send" title="Enviar">▶</button>
+                </div>
+            </div>
+            <button id="chat-btn" title="Chatear con Zenix">💬</button>
+        </div>
+    </div>
 </body>
 </html>
