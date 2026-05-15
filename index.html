@@ -30,6 +30,7 @@
 
     <style>
         /* ---- HERO GRID ---- */
+       /* ---- HERO GRID ---- */
         .hero-grid-bg {
             position: absolute;
             inset: 0;
@@ -210,12 +211,15 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-xl);
-            aspect-ratio: 3/4;
+            width: 100%;
+            max-width: 280px;
+            aspect-ratio: 1/1;
             display: flex;
             align-items: flex-end;
             justify-content: center;
             position: relative;
             overflow: hidden;
+            margin: 0 auto;
         }
 
         .split-img-zenix::before {
@@ -413,26 +417,38 @@
         document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
     </script>
 
-    <!-- ===================== CHATBOT FLOTANTE ===================== -->
+    <!-- CHATBOT ZENIX -->
     <div id="chatbot-container">
-        <div id="zenix-side-avatar" title="Hablar con Zenix IA">
-            <img src="IMAGEN/SDK.png" alt="Zenix IA - Asistente Virtual SDK FINIX">
-        </div>
-        <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
-            <div id="chat-window">
-                <div id="chat-header">
-                    <h3>⚡ Zenix IA</h3>
-                    <button id="chat-close" title="Cerrar">✕</button>
+        <!-- CHAT WINDOW -->
+        <div id="chat-window">
+            <div id="chat-header">
+                <div class="chat-header-info">
+                    <div>
+                        <h3>Zenix IA ⚡</h3>
+                        <span>En línea</span>
+                    </div>
                 </div>
-                <div id="chat-body" class="chat-body">
-                    <div class="msg bot">¡Hola! Soy <strong>Zenix</strong> ⚡, la IA oficial de SDK FINIX. Estoy aquí para ayudarte con cualquier consulta sobre nuestros servicios. ¿En qué puedo ayudarte hoy?</div>
-                </div>
-                <div id="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Escribe tu consulta...">
-                    <button id="chat-send" title="Enviar">▶</button>
+                <button id="chat-close">✕</button>
+            </div>
+            <div id="chat-body">
+                <div class="msg bot">
+                    ¡Hola! Soy <span class="accent-cyan">Zenix</span>. ¿En qué puedo ayudarte hoy?
                 </div>
             </div>
-            <button id="chat-btn" title="Chatear con Zenix">💬</button>
+            <div id="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Escribe aquí...">
+                <button id="chat-send">▶</button>
+            </div>
+        </div>
+
+        <!-- FLOATING TRIGGER -->
+        <div class="chat-trigger-wrapper">
+            <div class="chat-avatar-hint">
+                <img src="IMAGEN/SDK.png" alt="Zenix Avatar">
+            </div>
+            <button id="chat-btn">
+                <div class="sphere-icon"></div>
+            </button>
         </div>
     </div>
 </body>

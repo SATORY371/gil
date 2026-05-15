@@ -1,11 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Cargar marked.js dinámicamente para parsear Markdown (tablas, negritas, etc)
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-    document.head.appendChild(script);
-
-    const WORKER_URL = "https://zenix-api.vegaquispeelvis.workers.dev/"; 
-
     const chatBody = document.getElementById('chat-body');
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
@@ -14,6 +7,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatHeader = document.getElementById('chat-header');
     const chatInputArea = document.getElementById('chat-input-area');
     const chatClose = document.getElementById('chat-close');
+
+    // 1. Cargar marked.js dinámicamente
+    const script = document.createElement('script');
+    script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+    document.head.appendChild(script);
+
+    // Indicador de conexión
+    if (chatHeader) {
+        const connectionStatus = document.createElement('div');
+        connectionStatus.id = 'connection-status';
+        connectionStatus.style.cssText = 'position:absolute; top:8px; right:60px; font-size:0.75rem; padding:2px 8px; border-radius:10px; z-index:100;';
+        chatHeader.appendChild(connectionStatus);
+
+        function updateConnectionStatus() {
+            if (navigator.onLine) {
+                connectionStatus.innerHTML = '🟢 Online';
+                connectionStatus.style.color = '#22ff88';
+            } else {
+                connectionStatus.innerHTML = '📴 Offline';
+                connectionStatus.style.color = '#ffaa00';
+            }
+        }
+
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+        updateConnectionStatus();
+    }
+
+    // Detectar ruta base para cargar knowledge-base.js correctamente
+    const currentScript = document.currentScript || Array.from(document.getElementsByTagName('script')).find(s => s.src.includes('chatbot.js'));
+    const basePath = currentScript ? currentScript.src.replace('chatbot.js', '') : '';
+    
+    // Auto-corregir rutas de imágenes
+    document.querySelectorAll('#chatbot-container img').forEach(img => {
+        const currentSrc = img.getAttribute('src') || '';
+        if (!currentSrc.trim() || currentSrc.includes('SDK.png')) {
+            img.src = basePath + "IMAGEN/SDK.png";
+        }
+    });
+
+    const kbScript = document.createElement('script');
+    kbScript.src = basePath + "knowledge-base.js";
+    kbScript.async = true;
+    document.head.appendChild(kbScript);
+
+    const WORKER_URL = "https://zenix-api.vegaquispeelvis.workers.dev/"; 
 
     // 2. Inyectar botones de Voz y Borrar en el UI dinámicamente
     if (chatHeader) {
@@ -113,17 +152,40 @@ document.addEventListener('DOMContentLoaded', () => {
         "¿Cómo contacto con soporte técnico? 🛠️"
     ];
 
+    function openChatWindow() {
+        if (!chatWindow) return;
+        chatWindow.classList.add('active');
+        chatInput?.focus();
+        if (chatBody.innerHTML.trim() === "") addSuggestions();
+    }
+
+    function closeChatWindow() {
+        if (!chatWindow) return;
+        chatWindow.classList.remove('active');
+    }
+
+    function toggleChatWindow() {
+        if (!chatWindow) return;
+        if (chatWindow.classList.contains('active')) {
+            closeChatWindow();
+        } else {
+            openChatWindow();
+        }
+    }
+
     if (chatBtn) {
-        chatBtn.addEventListener('click', () => {
-            chatWindow.classList.toggle('active');
-            if (chatWindow.classList.contains('active')) {
-                chatInput.focus();
-                if (chatBody.innerHTML.trim() === "") addSuggestions();
-            }
+        chatBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            toggleChatWindow();
         });
     }
 
-    if (chatClose) chatClose.addEventListener('click', () => chatWindow.classList.remove('active'));
+    if (chatClose) {
+        chatClose.addEventListener('click', (event) => {
+            event.preventDefault();
+            closeChatWindow();
+        });
+    }
 
     function addSuggestions() {
         const container = document.createElement('div');
@@ -143,42 +205,61 @@ document.addEventListener('DOMContentLoaded', () => {
         chatBody.appendChild(container);
     }
 
-    async function sendMessage(overrideText = null) {
+       async function sendMessage(overrideText = null) {
         const text = overrideText || chatInput.value.trim();
         if (!text) return;
 
         addMessage(text, 'user');
         chatInput.value = '';
-        
+
         const oldSuggestions = chatBody.querySelector('.suggestion-container');
         if (oldSuggestions) oldSuggestions.remove();
 
         const typing = showTyping();
 
-        try {
-            const response = await fetch(WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
-            });
+        // ==================== NUEVA LÓGICA OFFLINE + ONLINE ====================
+        let reply = "";
 
-            const data = await response.json();
-            if (typing) typing.remove();
+        // 1. Intentar responder con la base de conocimiento local (siempre)
+        if (typeof findBestResponse === 'function') {
+            reply = findBestResponse(text);
+        }
 
-            let rawReply = data.reply || "Error de red.";
-            addMessage(rawReply, 'bot');
+        // 2. Si no hay respuesta local o es muy genérica y estamos online → usar IA
+        const needsIA = !reply || 
+                        (typeof reply === 'string' && (
+                            reply.includes("dime el modelo exacto") || 
+                            reply.includes("Necesito más detalles") ||
+                            reply.length < 40
+                        ));
 
-            // Leer respuesta en voz alta si está habilitado
-            if (window.zenixSpeakerEnabled && window.zenixSpeakerEnabled()) {
-                const cleanText = rawReply.replace(/[*#`_]/g, ''); // Limpiar markdown para hablar
-                const u = new SpeechSynthesisUtterance(cleanText);
-                u.lang = 'es-ES';
-                window.speechSynthesis.speak(u);
+        if (navigator.onLine && needsIA) {
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                reply = data.reply || reply;   // Si la IA responde bien, la usamos
+            } catch (error) {
+                // Si falla la API, nos quedamos con la respuesta offline
+                console.log("API offline, usando conocimiento local");
             }
+        }
 
-        } catch (error) {
-            if (typing) typing.remove();
-            addMessage("Error de conexión neuronal.", 'bot');
+        if (typing) typing.remove();
+
+        // Mostrar la respuesta
+        addMessage(reply, 'bot');
+
+        // Voz
+        if (window.zenixSpeakerEnabled && window.zenixSpeakerEnabled()) {
+            const cleanText = reply.replace(/[*#`_]/g, '');
+            const u = new SpeechSynthesisUtterance(cleanText);
+            u.lang = 'es-ES';
+            window.speechSynthesis.speak(u);
         }
     }
 
