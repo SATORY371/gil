@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../IMAGEN/SDK-FINIX.ico">
+    <title>Zenix | Ciber-Núcleo Conversacional</title>
+    <meta name="description" content="Habla directamente con Zenix a pantalla completa.">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../css/zenix.css">
+    <!-- ESTILOS LOCALES PARA EL CHAT A PANTALLA COMPLETA -->
+    <style>
+        body {
+            overflow: hidden !important; /* Desactivar scroll general de la página */
+            background: #0d0d0f;
+        }
+
+        /* Ocultamos el pie de página */
+        footer {
+            display: none !important;
+        }
+
+        .zenix-app-container {
+            height: 100vh;
+            width: 100vw;
+            padding: 80px 0 0 0; /* Espacio exacto para esquivar tu header fijo */
+            display: flex;
+            flex-direction: column;
+            background: rgba(13,13,15,1);
+        }
+
+        /* Ocultar el título de "Bienvenido al Ciber Núcleo" para que sea 100% app */
+        .zenix-app-header {
+            display: none;
+        }
+
+        .zenix-app-chat-wrapper {
+            width: 100%;
+            max-width: 100%;
+            flex: 1; /* Rellenar todo el espacio sobrante hasta abajo */
+            background: rgba(13,13,15,0.9);
+            border: none;
+            border-top: 1px solid var(--border);
+            border-radius: 0;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-sidebar {
+            width: 280px;
+            background: rgba(0,0,0,0.5);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            z-index: 2;
+        }
+
+        .chat-sidebar .new-chat-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px dashed var(--cyan);
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .chat-sidebar .new-chat-btn:hover {
+            background: rgba(34,211,238,0.1);
+        }
+
+        .chat-history-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .chat-history-list::-webkit-scrollbar { width: 4px; }
+        .chat-history-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+        .chat-item {
+            padding: 0.8rem;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .chat-item:hover, .chat-item.active {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-image: url('../IMAGEN/SDK.png');
+            background-size: 40%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .chat-main::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(13,13,15,0.65); /* Hecho más transparente que 0.92 */
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Estilos Glassmorfismo para Mensajes */
+        .full-screen-chat .msg {
+            max-width: 80%;
+            padding: 1.2rem 1.5rem;
+            border-radius: 24px;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .full-screen-chat .msg.bot {
+            align-self: flex-start !important;
+            border-bottom-left-radius: 4px !important;
+            background: rgba(26, 26, 32, 0.5) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .full-screen-chat .msg.user {
+            align-self: flex-end !important;
+            text-align: right;
+            border-bottom-right-radius: 4px !important;
+            background: rgba(34, 211, 238, 0.15) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(34, 211, 238, 0.3) !important;
+            color: #fff !important;
+            box-shadow: 0 2px 10px rgba(34, 211, 238, 0.1);
+        }
+
+        .full-screen-chat {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .full-screen-chat::-webkit-scrollbar { width: 6px; }
+        .full-screen-chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+
+        .full-screen-input {
+            padding: 1.5rem;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+            align-items: center;
+        }
+
+        .msg-controls {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+            justify-content: flex-end;
+            padding-top: 5px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .msg-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .msg-btn:hover {
+            background: rgba(34,211,238,0.1);
+            color: #fff;
+            border-color: rgba(34,211,238,0.3);
+        }
+
+        .full-screen-input input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1.05rem;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .full-screen-input input:focus {
+            border-color: rgba(34,211,238,0.4);
+            box-shadow: 0 0 0 2px rgba(34,211,238,0.1);
+            outline: none;
+        }
+
+        .full-screen-input button {
+            width: 60px;
+            background: var(--grad-main);
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: #000;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .full-screen-input button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(34,211,238,0.4);
+        }
+
+        .full-screen-input .icon-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: #fff;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .full-screen-input .icon-btn:hover {
+            background: rgba(34,211,238,0.1);
+            border-color: var(--cyan);
+        }
+
+        .full-screen-input .icon-btn.recording {
+            background: rgba(239,68,68,0.2) !important; /* Rojo animado */
+            border-color: #ef4444;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="header">
+        <a href="../index.html" class="logo">
+            <div class="logo-icon" style="background:none;padding:0;width:36px;height:36px;overflow:hidden;"><img src="../IMAGEN/SDK-FINIX.ico" alt="SDK FINIX Logo" style="width:100%;height:100%;object-fit:contain;border-radius:8px;"></div>
+            SDK <span>FINIX</span>
+        </a>
+        <nav id="nav">
+            <ul>
+                <li><a href="../index.html">Inicio</a></li>
+                <li><a href="../services/index.html">Servicios</a></li>
+                <li><a href="../about/index.html">Nosotros</a></li>
+                <li><a href="../zenix/index.html">Zenix IA</a></li>
+                <li><a href="../contact/index.html">Contacto</a></li>
+            </ul>
+        </nav>
+        <div class="nav-cta">
+            <a href="../contact/index.html" class="btn btn-outline">Contactar</a>
+            <a href="../services/index.html" class="btn">Ver Servicios →</a>
+        </div>
+    </header>
+
+    <!-- AVISO DE PRUEBA -->
+    <div style="position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #fff; padding: 10px 20px; text-align: center; font-weight: bold; font-size: 0.9rem; border-radius: 8px; backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); z-index: 9999; max-width: 90%; width: max-content;">
+        ⚠️ Esta página es de prueba, no está implementada al 100%. Por favor, tener paciencia hasta que sea lanzada oficialmente.
+    </div>
+
+    <!-- APP CONVERSACIONAL A PANTALLA COMPLETA -->
+    <section class="zenix-app-container">
+        <div class="zenix-app-header">
+            <div class="pill">
+                <span class="pill-dot"></span>
+                Zenix IA · Conectada
+            </div>
+            <h1>Ciber-Núcleo <span class="accent">Zenix</span></h1>
+            <p>Comunícate conmigo sin límites de caracteres y con respuestas expandidas.</p>
+        </div>
+
+        <div class="zenix-app-chat-wrapper">
+            <!-- SIDEBAR HISTORIAL -->
+            <div class="chat-sidebar">
+                <button type="button" id="new-chat-btn" class="new-chat-btn">
+                    <span>+</span> Nuevo Chat
+                </button>
+                <div id="chat-history-list" class="chat-history-list">
+                    <!-- Aquí se inyectarán los chats guardados -->
+                </div>
+            </div>
+
+            <!-- CHAT ACTIVO -->
+            <div class="chat-main">
+                <div id="chat-body" class="chat-body full-screen-chat">
+                    <!-- Los mensajes se llenan por JS -->
+                    <div class="msg bot">¡Ey, netrunner! ⚡ Has entrado a mi Ciber-Núcleo. Inicia un nuevo chat o selecciona uno del historial para continuar. ¿En qué trabajamos hoy?</div>
+                </div>
+                <div id="chat-input-area" class="full-screen-input">
+                    <button type="button" id="btn-speaker" class="icon-btn" title="Activar voz de Zenix">🔈</button>
+                    <input type="text" id="chat-input" placeholder="Escribe tu mensaje o usa el micrófono...">
+                    <button type="button" id="btn-mic" class="icon-btn" title="Dictar por micrófono">🎙️</button>
+                    <button type="button" id="chat-send">▶</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 SDK FINIX · Zenix &mdash; El futuro de la tecnología.</p>
+    </footer>
+
+    <script src="../main.js"></script>
+    <script src="agent.js"></script>
+</body>
+</html>
